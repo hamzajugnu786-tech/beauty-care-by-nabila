@@ -74,53 +74,50 @@ export function GalleryPageContent() {
         {/* Masonry Grid */}
         <section className="section-padding py-16 sm:py-20">
           <div className="max-w-[1440px] mx-auto">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeCategory}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-5"
-              >
-                {filteredItems.map((item, index) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    className="mb-4 sm:mb-5 break-inside-avoid group"
-                  >
-                    <div className="relative overflow-hidden rounded-sm bg-dark-card border border-champagne-gold/8 hover:border-champagne-gold/20 transition-all duration-700">
-                      {/* Image placeholder with aspect ratio */}
-                      <div className={`${aspectMap[item.height]} relative overflow-hidden`}>
-                        <div className="absolute inset-0 bg-gradient-to-br from-champagne-gold/[0.03] to-dark-card flex items-center justify-center">
-                          <div className="text-center">
-                            <svg className="w-8 h-8 text-champagne-gold/20 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25a1.5 1.5 0 001.5 1.5z" />
-                            </svg>
-                            <p className="mt-2 font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.2em] text-champagne-gold/25">
-                              {item.category}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-matte-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                          <p className="font-[family-name:var(--font-cormorant)] text-sm text-text-primary">
-                            {item.alt}
-                          </p>
-                          <p className="mt-1 font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.2em] text-champagne-gold/60">
+            <motion.div
+              key={activeCategory}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-5"
+            >
+              {filteredItems.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="mb-4 sm:mb-5 break-inside-avoid group"
+                >
+                  <div className="relative overflow-hidden rounded-sm bg-dark-card border border-champagne-gold/8 hover:border-champagne-gold/20 transition-all duration-700">
+                    {/* Image placeholder with aspect ratio */}
+                    <div className={`${aspectMap[item.height]} relative overflow-hidden`}>
+                      <div className="absolute inset-0 bg-gradient-to-br from-champagne-gold/[0.03] to-dark-card flex items-center justify-center">
+                        <div className="text-center">
+                          <svg className="w-8 h-8 text-champagne-gold/20 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25a1.5 1.5 0 001.5 1.5z" />
+                          </svg>
+                          <p className="mt-2 font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.2em] text-champagne-gold/25">
                             {item.category}
                           </p>
                         </div>
                       </div>
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-matte-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                        <p className="font-[family-name:var(--font-cormorant)] text-sm text-text-primary">
+                          {item.alt}
+                        </p>
+                        <p className="mt-1 font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.2em] text-champagne-gold/60">
+                          {item.category}
+                        </p>
+                      </div>
                     </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
 
             {filteredItems.length === 0 && (
               <motion.div

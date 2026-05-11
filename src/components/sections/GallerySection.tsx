@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { GALLERY_IMAGES } from "@/lib/constants";
@@ -14,10 +14,13 @@ export function GallerySection() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
 
-  const filteredImages =
-    activeCategory === "all"
-      ? GALLERY_IMAGES
-      : GALLERY_IMAGES.filter((img) => img.category === activeCategory);
+  const filteredImages = useMemo(
+    () =>
+      activeCategory === "all"
+        ? GALLERY_IMAGES
+        : GALLERY_IMAGES.filter((img) => img.category === activeCategory),
+    [activeCategory]
+  );
 
   return (
     <section className="section-gap section-padding relative overflow-hidden">
@@ -53,57 +56,59 @@ export function GallerySection() {
           </div>
         </RevealOnScroll>
 
-        {/* Gallery Grid - Fixed: Use key on grid to force re-render on category change */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-          <AnimatePresence mode="popLayout">
-            {filteredImages.map((image) => (
-              <motion.div
-                key={image.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative aspect-square overflow-hidden rounded-sm cursor-pointer bg-dark-card border border-champagne-gold/5 hover:border-champagne-gold/20 transition-all duration-700"
-                onClick={() => setSelectedImage(image.id)}
-              >
-                {/* Placeholder with gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-dark-card via-dark-elevated/50 to-dark-card">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-10 h-10 rounded-full border border-champagne-gold/15 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
-                      <svg
-                        className="w-4 h-4 text-champagne-gold/30 group-hover:text-champagne-gold/50 transition-colors duration-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v15a1.5 1.5 0 001.5 1.5z"
-                        />
-                      </svg>
-                    </div>
+        {/* Gallery Grid - Using key on grid container for clean re-render on category change */}
+        <motion.div
+          key={activeCategory}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
+        >
+          {filteredImages.map((image, index) => (
+            <motion.div
+              key={image.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.05, duration: 0.4 }}
+              className="group relative aspect-square overflow-hidden rounded-sm cursor-pointer bg-dark-card border border-champagne-gold/5 hover:border-champagne-gold/20 transition-all duration-700"
+              onClick={() => setSelectedImage(image.id)}
+            >
+              {/* Placeholder with gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-dark-card via-dark-elevated/50 to-dark-card">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full border border-champagne-gold/15 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                    <svg
+                      className="w-4 h-4 text-champagne-gold/30 group-hover:text-champagne-gold/50 transition-colors duration-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v15a1.5 1.5 0 001.5 1.5z"
+                      />
+                    </svg>
                   </div>
                 </div>
+              </div>
 
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                {/* Category label */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                  <p className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-champagne-gold/70">
-                    {image.category}
-                  </p>
-                  <p className="font-[family-name:var(--font-cormorant)] text-sm text-text-primary/80 mt-0.5">
-                    {image.alt}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+              {/* Category label */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                <p className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-champagne-gold/70">
+                  {image.category}
+                </p>
+                <p className="font-[family-name:var(--font-cormorant)] text-sm text-text-primary/80 mt-0.5">
+                  {image.alt}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {/* Empty state when no images match */}
         {filteredImages.length === 0 && (

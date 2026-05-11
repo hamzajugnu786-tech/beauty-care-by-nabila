@@ -21,7 +21,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>
+      <SessionProvider
+        refetchInterval={0}
+        refetchOnWindowFocus={false}
+      >
         <AnnouncerProvider>
           <SkipToContent />
           {children}
