@@ -84,9 +84,11 @@ export function Navbar() {
               >
                 VIP
               </Link>
-              <LuxuryButton size="sm" onClick={() => {}}>
-                Book Now
-              </LuxuryButton>
+              <Link href="/booking">
+                <LuxuryButton size="sm">
+                  Book Now
+                </LuxuryButton>
+              </Link>
             </div>
 
             {/* Mobile Menu Toggle */}
@@ -163,9 +165,11 @@ export function Navbar() {
                 transition={{ delay: 0.5, duration: 0.5 }}
                 className="mt-8 flex flex-col items-center gap-4"
               >
-                <LuxuryButton size="lg" onClick={() => setMobileOpen(false)}>
-                  Book Appointment
-                </LuxuryButton>
+                <Link href="/booking" onClick={() => setMobileOpen(false)}>
+                  <LuxuryButton size="lg">
+                    Book Appointment
+                  </LuxuryButton>
+                </Link>
                 <Link
                   href="/vip"
                   onClick={() => setMobileOpen(false)}

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,8 +11,108 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  phone     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  bookings  Booking[]
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  confirmationCode String @unique
+  // Branch
+  branchId        String
+  branchName      String
+  // Service
+  serviceId       String
+  serviceTitle    String
+  serviceCategory String
+  servicePrice    String
+  serviceDuration String
+  addOns          String   @default("")  // JSON stringified array
+  // Artist
+  artistId        String?
+  artistName      String?
+  // Schedule
+  date            String   // ISO date string YYYY-MM-DD
+  timeSlot        String   // e.g. "10:00"
+  // Client
+  clientName      String
+  clientPhone     String
+  clientEmail     String?
+  clientNotes     String   @default("")
+  // Status
+  status          String   @default("pending")  // pending, confirmed, in-progress, completed, cancelled, no-show
+  paymentStatus   String   @default("unpaid")   // unpaid, deposit, paid, refunded
+  // Meta
+  whatsappSent    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  // Relations
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  phone     String
+  isMain    Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ArtistAvailability {
+  id        String   @id @default(cuid())
+  artistId  String
+  date      String   // ISO date string
+  startTime String   // "10:00"
+  endTime   String   // "20:00"
+  isOff     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([artistId, date])
+}
+
+model BlockedSlot {
+  id        String   @id @default(cuid())
+  artistId  String?
+  date      String
+  timeSlot  String   // "10:00"
+  bookingId String?
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([artistId, date, timeSlot])
+}
+
+model Service {
+  id          String @id @default(cuid())
+  title       String
+  category    String
+  price       String
+  duration    String
+  icon        String
+  description String @default("")
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Artist {
+  id          String @id @default(cuid())
+  name        String
+  title       String
+  specialties String @default("")  // JSON stringified array
+  experience  String
+  image       String @default("")
+  rating      Float  @default(5.0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Post {
