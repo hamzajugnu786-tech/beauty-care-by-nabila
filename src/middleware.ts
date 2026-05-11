@@ -187,8 +187,8 @@ function buildCSP(): string {
   const isDev = process.env.NODE_ENV === "development";
 
   const frameAncestors = isDev
-    ? `frame-ancestors 'self' 'unsafe-inline' https://*.space-z.ai https://*.space.chatglm.site https://*.chatglm.site`
-    : `frame-ancestors 'self'`;
+    ? `frame-ancestors 'self' 'unsafe-inline' https://*.space-z.ai https://*.space.chatglm.site https://*.chatglm.site http://localhost:*`
+    : `frame-ancestors 'self' https://*.space-z.ai https://*.space.chatglm.site https://*.chatglm.site`;
 
   const directives: string[] = [
     `default-src 'self'`,
@@ -218,8 +218,8 @@ function getSecurityHeaders(): Record<string, string> {
   const isProduction = process.env.NODE_ENV === "production";
 
   return {
-    // Allow iframe embedding from preview domains in dev, same-origin in prod
-    "X-Frame-Options": isProduction ? "SAMEORIGIN" : "ALLOWALL",
+    // X-Frame-Options removed - using CSP frame-ancestors instead (modern standard)
+    // This allows the preview iframe to embed our site across origins
     "X-Content-Type-Options": "nosniff",
     "X-XSS-Protection": "1; mode=block",
     "Referrer-Policy": "strict-origin-when-cross-origin",

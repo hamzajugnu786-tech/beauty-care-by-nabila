@@ -99,12 +99,8 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
-          // Security headers - Allow iframe embedding for preview
-          // In production, consider changing back to DENY if not needed
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
+          // X-Frame-Options removed - using CSP frame-ancestors instead (modern standard)
+          // This allows the preview iframe to embed our site
           {
             key: "X-Content-Type-Options",
             value: "nosniff",
