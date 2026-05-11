@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { LuxuryButton } from "@/components/ui/LuxuryButton";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
@@ -64,9 +63,7 @@ export function CTABanner() {
 
         <RevealOnScroll delay={0.3}>
           <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-            <Link href="/booking">
-              <LuxuryButton size="lg">Book Appointment</LuxuryButton>
-            </Link>
+            <LuxuryButton href="/booking" size="lg">Book Appointment</LuxuryButton>
             <a
               href="https://wa.me/923001234567"
               target="_blank"

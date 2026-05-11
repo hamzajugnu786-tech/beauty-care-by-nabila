@@ -130,11 +130,9 @@ export function ServicesSection() {
 
         {/* CTA */}
         <RevealOnScroll className="mt-14 text-center">
-          <Link href="/services">
-            <LuxuryButton variant="outline" size="md">
-              View All Services
-            </LuxuryButton>
-          </Link>
+          <LuxuryButton href="/services" variant="outline" size="md">
+            View All Services
+          </LuxuryButton>
         </RevealOnScroll>
       </div>
     </section>

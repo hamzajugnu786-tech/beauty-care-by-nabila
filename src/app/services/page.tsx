@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -255,9 +255,7 @@ function ServiceDetailModal({
 
             {/* CTA */}
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
-              <Link href={`/booking?service=${service.id}`}>
-                <LuxuryButton size="md">Book This Service</LuxuryButton>
-              </Link>
+              <LuxuryButton href={`/booking?service=${service.id}`} size="md">Book This Service</LuxuryButton>
               <a
                 href={`https://wa.me/923001234567?text=Hi, I'm interested in the ${service.title} service`}
                 target="_blank"
@@ -276,8 +274,17 @@ function ServiceDetailModal({
 }
 
 export default function ServicesPage() {
+  const searchParams = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [expandedService, setExpandedService] = useState<string | null>(null);
+
+  // Read category from URL search params on mount
+  useEffect(() => {
+    const category = searchParams.get("category");
+    if (category && SERVICE_CATEGORIES.some((c) => c.id === category)) {
+      setActiveCategory(category);
+    }
+  }, [searchParams]);
 
   const filteredServices =
     activeCategory === "all"
@@ -428,18 +435,14 @@ export default function ServicesPage() {
                 Book your consultation today and let our artisans craft an experience that is uniquely, beautifully yours.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <Link href="/booking">
-                  <LuxuryButton size="lg">Book Appointment</LuxuryButton>
-                </Link>
-                <a
-                  href="https://wa.me/923001234567?text=Hi, I'd like to book an appointment"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <LuxuryButton href="/booking" size="lg">Book Appointment</LuxuryButton>
+                <LuxuryButton
+                  variant="outline"
+                  size="lg"
+                  onClick={() => window.open("https://wa.me/923001234567?text=Hi, I'd like to book an appointment", "_blank")}
                 >
-                  <LuxuryButton variant="outline" size="lg">
-                    WhatsApp Us
-                  </LuxuryButton>
-                </a>
+                  WhatsApp Us
+                </LuxuryButton>
               </div>
             </RevealOnScroll>
           </div>

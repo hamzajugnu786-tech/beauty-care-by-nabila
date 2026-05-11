@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -290,12 +289,8 @@ export function AboutPageContent() {
                 Visit us at M.M. Alam Road, Gulberg III, Lahore, and discover the artistry that has made us the city&apos;s most beloved salon.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <Link href="/booking">
-                  <LuxuryButton size="lg">Book an Appointment</LuxuryButton>
-                </Link>
-                <Link href="/contact">
-                  <LuxuryButton variant="outline" size="lg">Get in Touch</LuxuryButton>
-                </Link>
+                <LuxuryButton href="/booking" size="lg">Book an Appointment</LuxuryButton>
+                <LuxuryButton href="/contact" variant="outline" size="lg">Get in Touch</LuxuryButton>
               </div>
             </RevealOnScroll>
           </div>

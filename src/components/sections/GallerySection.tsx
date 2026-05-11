@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { GALLERY_IMAGES } from "@/lib/constants";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
@@ -168,9 +167,7 @@ export function GallerySection() {
 
         {/* Book Appointment CTA */}
         <RevealOnScroll className="mt-14 text-center">
-          <Link href="/booking">
-            <LuxuryButton size="lg">Book Appointment</LuxuryButton>
-          </Link>
+          <LuxuryButton href="/booking" size="lg">Book Appointment</LuxuryButton>
         </RevealOnScroll>
 
         {/* Instagram CTA */}

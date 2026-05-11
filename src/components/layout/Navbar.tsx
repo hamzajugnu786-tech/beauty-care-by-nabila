@@ -1,31 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { NAV_LINKS, BRAND } from "@/lib/constants";
 import { LuxuryButton } from "@/components/ui/LuxuryButton";
 
 export function Navbar() {
+  const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Only run client-side effects after mount to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const currentY = window.scrollY;
+    setScrolled(currentY > 50);
+    setHidden(currentY > 300 && currentY > window.scrollY);
+  }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      setScrolled(currentY > 50);
-      if (currentY > 300 && currentY > lastScrollY) {
-        setHidden(true);
-      } else {
-        setHidden(false);
-      }
-      setLastScrollY(currentY);
-    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, [handleScroll]);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -42,10 +43,10 @@ export function Navbar() {
     <>
       <motion.header
         initial={{ y: 0 }}
-        animate={{ y: hidden ? -100 : 0 }}
+        animate={{ y: hidden && mounted ? -100 : 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
-          scrolled
+          scrolled && mounted
             ? "bg-matte-black/80 backdrop-blur-xl border-b border-champagne-gold/10"
             : "bg-transparent"
         }`}
@@ -84,11 +85,9 @@ export function Navbar() {
               >
                 VIP
               </Link>
-              <Link href="/booking">
-                <LuxuryButton size="sm">
-                  Book Now
-                </LuxuryButton>
-              </Link>
+              <LuxuryButton href="/booking" size="sm">
+                Book Now
+              </LuxuryButton>
             </div>
 
             {/* Mobile Menu Toggle */}
@@ -99,29 +98,20 @@ export function Navbar() {
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-controls="mobile-menu"
             >
-              <motion.span
-                animate={
-                  mobileOpen
-                    ? { rotate: 45, y: 6, backgroundColor: "#D4AF37" }
-                    : { rotate: 0, y: 0, backgroundColor: "#F8F5F0" }
-                }
-                className="w-6 h-px block transition-colors duration-300"
+              <span
+                className={`w-6 h-px block transition-all duration-300 ${
+                  mobileOpen ? "bg-champagne-gold rotate-45 translate-y-[7px]" : "bg-text-primary"
+                }`}
               />
-              <motion.span
-                animate={
-                  mobileOpen
-                    ? { opacity: 0, scaleX: 0 }
-                    : { opacity: 1, scaleX: 1 }
-                }
-                className="w-6 h-px bg-text-primary block"
+              <span
+                className={`w-6 h-px block transition-all duration-300 ${
+                  mobileOpen ? "bg-text-primary opacity-0 scale-x-0" : "bg-text-primary opacity-100 scale-x-100"
+                }`}
               />
-              <motion.span
-                animate={
-                  mobileOpen
-                    ? { rotate: -45, y: -6, backgroundColor: "#D4AF37" }
-                    : { rotate: 0, y: 0, backgroundColor: "#F8F5F0" }
-                }
-                className="w-6 h-px block transition-colors duration-300"
+              <span
+                className={`w-6 h-px block transition-all duration-300 ${
+                  mobileOpen ? "bg-champagne-gold -rotate-45 -translate-y-[7px]" : "bg-text-primary"
+                }`}
               />
             </button>
           </div>
@@ -171,11 +161,9 @@ export function Navbar() {
                 transition={{ delay: 0.5, duration: 0.5 }}
                 className="mt-8 flex flex-col items-center gap-4"
               >
-                <Link href="/booking" onClick={() => setMobileOpen(false)}>
-                  <LuxuryButton size="lg">
-                    Book Appointment
-                  </LuxuryButton>
-                </Link>
+                <LuxuryButton href="/booking" onClick={() => setMobileOpen(false)} size="lg">
+                  Book Appointment
+                </LuxuryButton>
                 <Link
                   href="/vip"
                   onClick={() => setMobileOpen(false)}

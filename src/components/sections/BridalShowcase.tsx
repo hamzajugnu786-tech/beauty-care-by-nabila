@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { LuxuryButton } from "@/components/ui/LuxuryButton";
@@ -151,9 +150,7 @@ export function BridalShowcase() {
             </div>
 
             <RevealOnScroll className="mt-10">
-              <Link href="/bridal">
-                <LuxuryButton size="lg">Explore Bridal Packages</LuxuryButton>
-              </Link>
+              <LuxuryButton href="/bridal" size="lg">Explore Bridal Packages</LuxuryButton>
             </RevealOnScroll>
           </div>
         </div>

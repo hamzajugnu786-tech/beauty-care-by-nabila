@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -442,18 +441,14 @@ export function ContactPageContent() {
                 For immediate assistance, call us directly or reach out on WhatsApp for a quick response. Our team is ready to help you book the perfect appointment.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <Link href="/booking">
-                  <LuxuryButton size="lg">Book Appointment</LuxuryButton>
-                </Link>
-                <a
-                  href={`https://wa.me/${BRAND.whatsapp}?text=Hi, I'd like to inquire about your services`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <LuxuryButton href="/booking" size="lg">Book Appointment</LuxuryButton>
+                <LuxuryButton
+                  variant="outline"
+                  size="lg"
+                  onClick={() => window.open(`https://wa.me/${BRAND.whatsapp}?text=Hi, I'd like to inquire about your services`, "_blank")}
                 >
-                  <LuxuryButton variant="outline" size="lg">
-                    WhatsApp Us
-                  </LuxuryButton>
-                </a>
+                  WhatsApp Us
+                </LuxuryButton>
               </div>
             </RevealOnScroll>
           </div>

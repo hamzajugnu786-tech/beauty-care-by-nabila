@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -188,18 +187,14 @@ export function GalleryPageContent() {
                 From the portfolio to your mirror. Book your appointment and let our artisans create your next stunning look.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <Link href="/booking">
-                  <LuxuryButton size="lg">Book Appointment</LuxuryButton>
-                </Link>
-                <a
-                  href={`https://wa.me/${BRAND.whatsapp}?text=Hi, I'd love to book a service after seeing your gallery`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <LuxuryButton href="/booking" size="lg">Book Appointment</LuxuryButton>
+                <LuxuryButton
+                  variant="outline"
+                  size="lg"
+                  onClick={() => window.open(`https://wa.me/${BRAND.whatsapp}?text=Hi, I'd love to book a service after seeing your gallery`, "_blank")}
                 >
-                  <LuxuryButton variant="outline" size="lg">
-                    WhatsApp Us
-                  </LuxuryButton>
-                </a>
+                  WhatsApp Us
+                </LuxuryButton>
               </div>
             </RevealOnScroll>
           </div>

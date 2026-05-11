@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { generatePageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -13,5 +14,5 @@ export default function ServicesLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <Suspense>{children}</Suspense>;
 }

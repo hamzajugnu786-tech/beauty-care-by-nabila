@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -165,15 +164,14 @@ export function BridalPageContent() {
 
                         {/* CTA */}
                         <div className="mt-8">
-                          <Link href={`/booking?package=${pkg.id}`}>
-                            <LuxuryButton
-                              size="md"
-                              variant={pkg.highlight ? "primary" : "outline"}
-                              className="w-full"
-                            >
-                              Select Package
-                            </LuxuryButton>
-                          </Link>
+                          <LuxuryButton
+                            href={`/booking?package=${pkg.id}`}
+                            size="md"
+                            variant={pkg.highlight ? "primary" : "outline"}
+                            className="w-full"
+                          >
+                            Select Package
+                          </LuxuryButton>
                         </div>
                       </div>
 
@@ -324,18 +322,14 @@ export function BridalPageContent() {
                 Book your bridal consultation today and let our artisans craft a transformation that will be cherished in photographs for generations to come.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <Link href="/booking?type=bridal">
-                  <LuxuryButton size="lg">Book Consultation</LuxuryButton>
-                </Link>
-                <a
-                  href={`https://wa.me/${BRAND.whatsapp}?text=Hi, I'm interested in your bridal packages`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <LuxuryButton href="/booking?type=bridal" size="lg">Book Consultation</LuxuryButton>
+                <LuxuryButton
+                  variant="outline"
+                  size="lg"
+                  onClick={() => window.open(`https://wa.me/${BRAND.whatsapp}?text=Hi, I'm interested in your bridal packages`, "_blank")}
                 >
-                  <LuxuryButton variant="outline" size="lg">
-                    WhatsApp Inquiry
-                  </LuxuryButton>
-                </a>
+                  WhatsApp Inquiry
+                </LuxuryButton>
               </div>
             </RevealOnScroll>
           </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -144,15 +143,14 @@ export function VipPageContent() {
 
                       {/* CTA */}
                       <div className="mt-8">
-                        <Link href={`/booking?type=vip&tier=${tier.id}`}>
-                          <LuxuryButton
-                            size="md"
-                            variant={tier.highlight ? "primary" : "outline"}
-                            className="w-full"
-                          >
-                            Join {tier.name}
-                          </LuxuryButton>
-                        </Link>
+                        <LuxuryButton
+                          href={`/booking?type=vip&tier=${tier.id}`}
+                          size="md"
+                          variant={tier.highlight ? "primary" : "outline"}
+                          className="w-full"
+                        >
+                          Join {tier.name}
+                        </LuxuryButton>
                       </div>
                     </div>
                   </motion.div>
@@ -219,18 +217,14 @@ export function VipPageContent() {
                 Membership is by invitation or application. Submit your interest and our concierge team will guide you through the enrolment process within 24 hours.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <Link href="/booking?type=vip">
-                  <LuxuryButton size="lg">Apply for Membership</LuxuryButton>
-                </Link>
-                <a
-                  href="https://wa.me/923001234567?text=Hi, I'm interested in VIP membership"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <LuxuryButton href="/booking?type=vip" size="lg">Apply for Membership</LuxuryButton>
+                <LuxuryButton
+                  variant="outline"
+                  size="lg"
+                  onClick={() => window.open("https://wa.me/923001234567?text=Hi, I'm interested in VIP membership", "_blank")}
                 >
-                  <LuxuryButton variant="outline" size="lg">
-                    WhatsApp Concierge
-                  </LuxuryButton>
-                </a>
+                  WhatsApp Concierge
+                </LuxuryButton>
               </div>
             </RevealOnScroll>
           </div>
