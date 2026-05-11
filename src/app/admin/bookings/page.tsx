@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { BOOKING_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from "@/lib/types/admin";
 import type { BookingStatus, PaymentStatus } from "@/lib/types/booking";
+import { BRAND } from "@/lib/constants";
 
 // ─── Mock Bookings ───
 const mockBookings = [

@@ -74,7 +74,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           email: session.user.email || "",
           name: session.user.name || "Admin",
           role,
-          image: session.user.image,
+          image: session.user.image ?? null,
         },
         getPermissionsForRole(role)
       );

@@ -1,0 +1,210 @@
+// ─────────────────────────────────────────────────────────────
+// Firebase Storage Security Rules
+// Beauty Care by Nabila
+// ─────────────────────────────────────────────────────────────
+//
+// Storage structure:
+//   /gallery/        - Gallery images (admin upload, public read)
+//   /staff/          - Staff/artist photos (admin upload, public read)
+//   /services/       - Service images (admin upload, public read)
+//   /blog/           - Blog post images (admin upload, public read)
+//   /testimonials/   - Testimonial photos (admin upload, public read)
+//   /uploads/        - General uploads (admin upload, public read)
+//
+// Deploy with: firebase deploy --only storage:rules
+// ─────────────────────────────────────────────────────────────
+
+rules_version = '2';
+
+service firebase.storage {
+
+  // Use the default storage bucket
+  match /b/{bucket}/o {
+
+    // ─── Helper Functions ───
+
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Get the user's role from custom claims
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+
+    // Check if user is super-admin
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserRole() == 'super-admin';
+    }
+
+    // Check if user is manager or above
+    function isManagerOrAbove() {
+      return isAuthenticated() &&
+        (getUserRole() == 'super-admin' || getUserRole() == 'manager');
+    }
+
+    // Check if user is staff or above
+    function isStaffOrAbove() {
+      return isAuthenticated() &&
+        (getUserRole() == 'super-admin' || getUserRole() == 'manager' || getUserRole() == 'staff');
+    }
+
+    // Maximum file size: 5MB
+    function isUnderMaxSize() {
+      return request.resource.size <= 5 * 1024 * 1024;
+    }
+
+    // Allowed image MIME types only
+    function isAllowedImageType() {
+      return request.resource.contentType == 'image/jpeg' ||
+             request.resource.contentType == 'image/png' ||
+             request.resource.contentType == 'image/webp' ||
+             request.resource.contentType == 'image/gif';
+    }
+
+    // File name does not contain path traversal attempts
+    function isSafeFileName() {
+      return !request.resource.name.contains('..') &&
+             !request.resource.name.contains('//');
+    }
+
+    // ─── Gallery Images ───
+
+    match /gallery/{imageId} {
+      // Public: Anyone can view gallery images
+      allow read: if true;
+
+      // Manager+: Upload gallery images
+      allow create: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Manager+: Update gallery images (replace)
+      allow update: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Super-admin only: Delete gallery images
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Staff / Artist Photos ───
+
+    match /staff/{imageId} {
+      // Public: Anyone can view staff photos
+      allow read: if true;
+
+      // Manager+: Upload staff photos
+      allow create: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Manager+: Update staff photos
+      allow update: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Super-admin only: Delete staff photos
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Service Images ───
+
+    match /services/{imageId} {
+      // Public: Anyone can view service images
+      allow read: if true;
+
+      // Manager+: Upload service images
+      allow create: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Manager+: Update service images
+      allow update: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Super-admin only: Delete service images
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Blog Post Images ───
+
+    match /blog/{imageId} {
+      // Public: Anyone can view blog images
+      allow read: if true;
+
+      // Manager+: Upload blog images
+      allow create: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Manager+: Update blog images
+      allow update: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Super-admin only: Delete blog images
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Testimonial Photos ───
+
+    match /testimonials/{imageId} {
+      // Public: Anyone can view testimonial photos
+      allow read: if true;
+
+      // Manager+: Upload testimonial photos
+      allow create: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Manager+: Update testimonial photos
+      allow update: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Super-admin only: Delete testimonial photos
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── General Uploads ───
+
+    match /uploads/{imageId} {
+      // Public: Anyone can view uploads
+      allow read: if true;
+
+      // Manager+: Upload files
+      allow create: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Manager+: Update files
+      allow update: if isManagerOrAbove()
+        && isUnderMaxSize()
+        && isAllowedImageType()
+        && isSafeFileName();
+
+      // Super-admin only: Delete files
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Deny all other paths by default ───
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

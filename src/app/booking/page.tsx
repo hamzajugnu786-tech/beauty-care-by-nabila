@@ -15,6 +15,8 @@ import { DateTimePicker } from "@/components/booking/DateTimePicker";
 import { ClientDetailsForm } from "@/components/booking/ClientDetailsForm";
 import { BookingConfirmation } from "@/components/booking/BookingConfirmation";
 import { WhatsAppConcierge } from "@/components/booking/WhatsAppConcierge";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { generateLocalBusinessSchema, PAGE_BREADCRUMBS } from "@/lib/structured-data";
 import { useBookingStore } from "@/stores/useBookingStore";
 
 const stepVariants = {
@@ -183,6 +185,7 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-matte-black">
+      <JsonLd data={[generateLocalBusinessSchema(), PAGE_BREADCRUMBS.booking]} />
       <Navbar />
       <main className="flex-1">
         {/* Hero */}

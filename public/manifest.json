@@ -1,0 +1,20 @@
+{
+  "name": "Beauty Care by Nabila Lahore",
+  "short_name": "Nabila Lahore",
+  "description": "Luxury beauty salon and bridal studio on M.M. Alam Road, Gulberg III, Lahore. Premium bridal couture, hair artistry, skincare, makeup, nails, and spa services.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0C0C10",
+  "theme_color": "#D4AF37",
+  "orientation": "portrait-primary",
+  "lang": "en-PK",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["beauty", "lifestyle", "health"]
+}

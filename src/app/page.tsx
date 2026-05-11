@@ -13,15 +13,20 @@ import { CTABanner } from "@/components/sections/CTABanner";
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-matte-black">
+      <a href="#main-content" className="sr-only focus:not-sr-only">
+        Skip to main content
+      </a>
       <Navbar />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1" role="main" aria-label="Main content">
         <HeroSection />
         <ServicesSection />
         <BridalShowcase />
         <StatsSection />
         <TestimonialsSection />
         <GallerySection />
-        <CTABanner />
+        <div id="booking-section">
+          <CTABanner />
+        </div>
       </main>
       <Footer />
     </div>

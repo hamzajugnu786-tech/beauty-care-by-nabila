@@ -1,0 +1,144 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+
+  "framework": "nextjs",
+
+  "buildCommand": "bun run build",
+
+  "outputDirectory": ".next",
+
+  "installCommand": "bun install",
+
+  "devCommand": "bun run dev",
+
+  "regions": ["sin1"],
+
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-DNS-Prefetch-Control", "value": "on" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(self), payment=(self), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), screen-wake-lock=(), fullscreen=(self)" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
+      ]
+    },
+    {
+      "source": "/_next/static/:path*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/fonts/:path*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/images/:path*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=31536000" }
+      ]
+    },
+    {
+      "source": "/api/:path*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=300" }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
+      ]
+    }
+  ],
+
+  "redirects": [
+    { "source": "/home", "destination": "/", "permanent": true },
+    { "source": "/bridal-studio", "destination": "/bridal", "permanent": true },
+    { "source": "/book", "destination": "/booking", "permanent": true },
+    { "source": "/book-appointment", "destination": "/booking", "permanent": true },
+    { "source": "/contact-us", "destination": "/contact", "permanent": true },
+    { "source": "/about-us", "destination": "/about", "permanent": true },
+    { "source": "/hair", "destination": "/services#hair", "permanent": true },
+    { "source": "/makeup", "destination": "/services#makeup", "permanent": true },
+    { "source": "/skincare", "destination": "/services#skincare", "permanent": true },
+    { "source": "/nails", "destination": "/services#nails", "permanent": true },
+    { "source": "/spa", "destination": "/services#spa", "permanent": true }
+  ],
+
+  "functions": {
+    "api/bookings/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/availability/route.ts": {
+      "memory": 1024,
+      "maxDuration": 15
+    },
+    "api/admin/bookings/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/admin/gallery/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/admin/auth/role/route.ts": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/admin/blog/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/admin/staff/route.ts": {
+      "memory": 1024,
+      "maxDuration": 15
+    },
+    "api/admin/services/route.ts": {
+      "memory": 1024,
+      "maxDuration": 15
+    },
+    "api/admin/testimonials/route.ts": {
+      "memory": 1024,
+      "maxDuration": 15
+    },
+    "api/admin/analytics/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/security/csrf-token/route.ts": {
+      "memory": 256,
+      "maxDuration": 5
+    },
+    "api/security/rate-limit/route.ts": {
+      "memory": 256,
+      "maxDuration": 5
+    },
+    "api/auth/[...nextauth]/route.ts": {
+      "memory": 512,
+      "maxDuration": 15
+    }
+  },
+
+  "images": {
+    "formats": ["image/avif", "image/webp"],
+    "minimumCacheTTL": 31536000,
+    "sizes": [640, 750, 828, 1080, 1200, 1920, 2048, 3840]
+  }
+}

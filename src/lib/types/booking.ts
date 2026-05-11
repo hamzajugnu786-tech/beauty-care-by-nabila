@@ -17,6 +17,7 @@ export interface BookingService {
   price: string;
   duration: string;
   icon: string;
+  addOns?: readonly string[];
 }
 
 export interface BookingArtist {

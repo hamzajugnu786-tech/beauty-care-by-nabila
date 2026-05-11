@@ -26,7 +26,7 @@ export const storage = getStorage(app);
 // Connect to emulators in development
 if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true") {
   try {
-    connectAuthEmulator(auth, "http://localhost:9099", { options: {} });
+    connectAuthEmulator(auth, "http://localhost:9099");
     connectFirestoreEmulator(db, "localhost", 8080);
     connectStorageEmulator(storage, "localhost", 9199);
   } catch {

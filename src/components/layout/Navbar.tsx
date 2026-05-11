@@ -50,7 +50,7 @@ export function Navbar() {
             : "bg-transparent"
         }`}
       >
-        <nav className="section-padding">
+        <nav id="main-navigation" className="section-padding" aria-label="Main navigation">
           <div className="flex items-center justify-between h-18 sm:h-20 max-w-[1440px] mx-auto">
             {/* Logo */}
             <Link href="/" className="relative z-50 group">
@@ -95,7 +95,9 @@ export function Navbar() {
             <button
               className="relative z-50 lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5"
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-controls="mobile-menu"
             >
               <motion.span
                 animate={
@@ -135,6 +137,10 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
             className="fixed inset-0 z-40 bg-matte-black/98 backdrop-blur-2xl lg:hidden"
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation menu"
           >
             <div className="flex flex-col items-center justify-center h-full gap-2">
               {NAV_LINKS.map((link, i) => (

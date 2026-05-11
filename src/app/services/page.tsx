@@ -8,9 +8,11 @@ import { PageHero } from "@/components/shared/PageHero";
 import { GoldDivider, SectionHeading } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll, StaggerContainer, StaggerItem } from "@/components/ui/RevealOnScroll";
 import { LuxuryButton } from "@/components/ui/LuxuryButton";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { generateServiceSchemas, PAGE_BREADCRUMBS } from "@/lib/structured-data";
 import { DETAILED_SERVICES, SERVICE_CATEGORIES } from "@/lib/constants";
 
-const serviceIcons: Record<string, JSX.Element> = {
+const serviceIcons: Record<string, React.ReactNode> = {
   crown: (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5M3.75 21V7.5l4.5 3 4.5-6 4.5 6 4.5-3V21" />
@@ -284,6 +286,7 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-matte-black">
+      <JsonLd data={[...generateServiceSchemas(), PAGE_BREADCRUMBS.services]} />
       <Navbar />
       <main className="flex-1">
         {/* Hero */}

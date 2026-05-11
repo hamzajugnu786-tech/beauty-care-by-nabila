@@ -17,7 +17,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"brand" | "system" | "notifications">("brand");
   const [saved, setSaved] = useState(false);
-  const [brandForm, setBrandForm] = useState({
+  const [brandForm, setBrandForm] = useState<Record<string, string>>({
     name: BRAND.name,
     tagline: BRAND.tagline,
     phone: BRAND.phone,

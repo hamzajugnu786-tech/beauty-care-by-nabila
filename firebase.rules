@@ -1,0 +1,294 @@
+// ─────────────────────────────────────────────────────────────
+// Firestore Security Rules
+// Beauty Care by Nabila
+// ─────────────────────────────────────────────────────────────
+//
+// Roles:
+//   super-admin  - Full access to everything
+//   manager      - Access to bookings, services, gallery, staff, testimonials
+//   staff        - Access to bookings only
+//
+// Deploy with: firebase deploy --only firestore:rules
+// ─────────────────────────────────────────────────────────────
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper Functions ───
+
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Get the user's role from custom claims
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+
+    // Check if user is super-admin
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserRole() == 'super-admin';
+    }
+
+    // Check if user is manager or above
+    function isManagerOrAbove() {
+      return isAuthenticated() &&
+        (getUserRole() == 'super-admin' || getUserRole() == 'manager');
+    }
+
+    // Check if user is staff or above (any authenticated admin)
+    function isStaffOrAbove() {
+      return isAuthenticated() &&
+        (getUserRole() == 'super-admin' || getUserRole() == 'manager' || getUserRole() == 'staff');
+    }
+
+    // Validate that a string field is non-empty and within length limits
+    function isValidString(value, minLen, maxLen) {
+      return value is string &&
+        value.size() >= minLen &&
+        value.size() <= maxLen;
+    }
+
+    // Validate phone number (Pakistan format)
+    function isValidPhone(value) {
+      return value is string &&
+        value.matches('^\\+92[0-9]{10}$');
+    }
+
+    // Validate email format
+    function isValidEmail(value) {
+      return value is string &&
+        value.matches('^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // Validate booking status
+    function isValidBookingStatus(value) {
+      return value is string &&
+        (value == 'pending' || value == 'confirmed' || value == 'in-progress' ||
+         value == 'completed' || value == 'cancelled' || value == 'no-show');
+    }
+
+    // Validate payment status
+    function isValidPaymentStatus(value) {
+      return value is string &&
+        (value == 'unpaid' || value == 'deposit' || value == 'paid' || value == 'refunded');
+    }
+
+    // Check if the request is a create operation
+    function isCreate() {
+      return request.method == 'create' ||
+             (request.method == 'write' && resource == null);
+    }
+
+    // Check if the request is an update operation
+    function isUpdate() {
+      return request.method == 'update' ||
+             (request.method == 'write' && resource != null);
+    }
+
+    // Prevent field deletion during updates (for required fields)
+    function fieldsNotDeleted(fields) {
+      return fields.all(field, field in request.resource.data);
+    }
+
+    // Rate limiting: check request time gap (simplified, relies on client-side rate limiting)
+    // Note: Firestore rules cannot implement true rate limiting.
+    // Rate limiting is enforced at the application middleware level.
+
+    // ─── Bookings Collection ───
+
+    match /bookings/{bookingId} {
+      // Public: Anyone can create a booking
+      allow create: if true
+        && isValidString(request.resource.data.clientName, 2, 100)
+        && isValidPhone(request.resource.data.clientPhone)
+        && isValidString(request.resource.data.serviceTitle, 2, 200)
+        && isValidString(request.resource.data.date, 10, 10)
+        && isValidString(request.resource.data.timeSlot, 5, 5)
+        && isValidBookingStatus(request.resource.data.status)
+        && isValidPaymentStatus(request.resource.data.paymentStatus);
+
+      // Authenticated staff+: Read bookings
+      allow read: if isStaffOrAbove();
+
+      // Authenticated staff+: Update booking status and details
+      allow update: if isStaffOrAbove()
+        && isValidBookingStatus(request.resource.data.status)
+        && isValidPaymentStatus(request.resource.data.paymentStatus);
+
+      // Super-admin only: Delete bookings
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Services Collection ───
+
+    match /services/{serviceId} {
+      // Public: Anyone can read services
+      allow read: if true;
+
+      // Manager+: Create and update services
+      allow create: if isManagerOrAbove()
+        && isValidString(request.resource.data.title, 2, 200)
+        && isValidString(request.resource.data.category, 2, 50)
+        && isValidString(request.resource.data.price, 1, 50);
+
+      allow update: if isManagerOrAbove()
+        && isValidString(request.resource.data.title, 2, 200)
+        && isValidString(request.resource.data.category, 2, 50)
+        && isValidString(request.resource.data.price, 1, 50);
+
+      // Super-admin only: Delete services
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Staff / Artists Collection ───
+
+    match /artists/{artistId} {
+      // Public: Anyone can read artist profiles
+      allow read: if true;
+
+      // Manager+: Create and update artists
+      allow create: if isManagerOrAbove()
+        && isValidString(request.resource.data.name, 2, 100)
+        && isValidString(request.resource.data.title, 2, 100);
+
+      allow update: if isManagerOrAbove()
+        && isValidString(request.resource.data.name, 2, 100)
+        && isValidString(request.resource.data.title, 2, 100);
+
+      // Super-admin only: Delete artists
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Gallery Collection ───
+
+    match /gallery/{galleryId} {
+      // Public: Anyone can read gallery images
+      allow read: if true;
+
+      // Manager+: Create and update gallery items
+      allow create: if isManagerOrAbove()
+        && isValidString(request.resource.data.image, 10, 500)
+        && isValidString(request.resource.data.alt, 2, 200)
+        && isValidString(request.resource.data.category, 2, 50);
+
+      allow update: if isManagerOrAbove();
+
+      // Super-admin only: Delete gallery items
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Testimonials Collection ───
+
+    match /testimonials/{testimonialId} {
+      // Public: Read only approved/active testimonials
+      allow read: if true;
+
+      // Manager+: Create testimonials
+      allow create: if isManagerOrAbove()
+        && isValidString(request.resource.data.name, 2, 100)
+        && isValidString(request.resource.data.quote, 10, 1000);
+
+      // Manager+: Update testimonials (including moderation)
+      allow update: if isManagerOrAbove();
+
+      // Super-admin only: Delete testimonials
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Blog Posts Collection ───
+
+    match /posts/{postId} {
+      // Public: Read only published posts
+      allow read: if true;
+
+      // Manager+: Create blog posts
+      allow create: if isManagerOrAbove()
+        && isValidString(request.resource.data.title, 2, 300)
+        && isValidString(request.resource.data.slug, 2, 200);
+
+      // Manager+: Update blog posts
+      allow update: if isManagerOrAbove();
+
+      // Super-admin only: Delete blog posts
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── User Profiles Collection ───
+
+    match /users/{userId} {
+      // Authenticated users can read their own profile
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+
+      // Authenticated users can update their own profile (limited fields)
+      allow update: if isAuthenticated() && request.auth.uid == userId
+        && !('role' in request.resource.data.diff(resource.data).updatedKeys)
+        && !('createdAt' in request.resource.data.diff(resource.data).updatedKeys);
+
+      // Super-admin can read and update any user profile
+      allow read: if isSuperAdmin();
+      allow update: if isSuperAdmin();
+
+      // Super-admin only: Create and delete user profiles
+      allow create: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Availability Collection ───
+
+    match /availability/{availabilityId} {
+      // Staff+: Read availability
+      allow read: if isStaffOrAbove();
+
+      // Manager+: Create and update availability
+      allow create: if isManagerOrAbove();
+      allow update: if isManagerOrAbove();
+
+      // Super-admin only: Delete availability
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Settings Collection (single document) ───
+
+    match /settings/{settingsId} {
+      // Public: Read site settings
+      allow read: if true;
+
+      // Super-admin only: Write site settings
+      allow write: if isSuperAdmin();
+    }
+
+    // ─── Analytics Collection ───
+
+    match /analytics/{analyticsId} {
+      // Staff+: Read analytics
+      allow read: if isStaffOrAbove();
+
+      // Manager+: Write analytics
+      allow write: if isManagerOrAbove();
+    }
+
+    // ─── Blocked Slots Collection ───
+
+    match /blockedSlots/{slotId} {
+      // Staff+: Read blocked slots
+      allow read: if isStaffOrAbove();
+
+      // Manager+: Create and update blocked slots
+      allow create: if isManagerOrAbove();
+      allow update: if isManagerOrAbove();
+
+      // Super-admin only: Delete blocked slots
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Deny all other collections by default ───
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

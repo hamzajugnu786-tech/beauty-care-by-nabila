@@ -242,3 +242,146 @@
 .section-gap {
   @apply py-20 sm:py-28 md:py-36;
 }
+
+/* ── Animation Optimization Utilities ── */
+
+/* GPU Acceleration - force element onto GPU compositor layer */
+.gpu-accelerate {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Will-change utilities - add before animation, remove after */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-transform-opacity {
+  will-change: transform, opacity;
+}
+
+/* Contain layout for animated containers to prevent layout thrashing */
+.contain-layout {
+  contain: layout;
+}
+
+/* Content visibility for off-screen sections - skip rendering until near viewport */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 500px;
+}
+
+/* GPU-friendly smooth transitions */
+.transition-gpu {
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.transition-gpu-fast {
+  transition-duration: 0.2s;
+}
+
+.transition-gpu-normal {
+  transition-duration: 0.5s;
+}
+
+.transition-gpu-luxury {
+  transition-duration: 0.8s;
+}
+
+/* Animation performance hints */
+.animate-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Prevent layout shift during animation loading */
+.animation-placeholder {
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fixed-width number display for counters (prevents CLS) */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Reduced Motion Preferences ── */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations and transitions */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Override specific keyframe animations */
+  .gold-shimmer {
+    animation: none !important;
+    -webkit-text-fill-color: #D4AF37;
+  }
+
+  .gold-border-shimmer::after {
+    animation: none !important;
+  }
+
+  /* Override keyframes */
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% center; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: none; }
+  }
+
+  @keyframes pulse-gold {
+    0%, 100% { opacity: 0.6; }
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; }
+    to { opacity: 1; transform: none; }
+  }
+
+  @keyframes scale-in {
+    from { opacity: 0; }
+    to { opacity: 1; transform: none; }
+  }
+
+  @keyframes line-expand {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  /* Remove will-change for reduced motion (saves GPU memory) */
+  .will-change-transform,
+  .will-change-opacity,
+  .will-change-transform-opacity {
+    will-change: auto !important;
+  }
+
+  /* Remove GPU acceleration in reduced motion (saves resources) */
+  .gpu-accelerate {
+    transform: none;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+  }
+
+  /* Content visibility always on in reduced motion */
+  .content-visibility-auto {
+    content-visibility: visible;
+    contain-intrinsic-size: auto;
+  }
+}

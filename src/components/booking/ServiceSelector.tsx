@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { BookingService } from "@/lib/types/booking";
 import { DETAILED_SERVICES, SERVICE_CATEGORIES } from "@/lib/constants";
@@ -13,7 +13,7 @@ interface ServiceSelectorProps {
   onToggleAddOn: (addOn: string) => void;
 }
 
-const serviceIcons: Record<string, JSX.Element> = {
+const serviceIcons: Record<string, React.ReactElement> = {
   crown: (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5M3.75 21V7.5l4.5 3 4.5-6 4.5 6 4.5-3V21" />

@@ -112,7 +112,6 @@ export async function GET(request: NextRequest) {
     const serviceBreakdown = await prisma.booking.groupBy({
       by: ["serviceCategory"],
       _count: { serviceCategory: true },
-      _sum: {},
     });
 
     return NextResponse.json({
