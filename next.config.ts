@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
   // Remove X-Powered-By header for security
   poweredByHeader: false,
 
+  // Allow cross-origin requests from preview iframe
+  allowedDevOrigins: [
+    ".space-z.ai",
+    ".space.chatglm.site",
+    ".chatglm.site",
+  ],
+
   // Enable TypeScript strict checking in builds
   typescript: {
     ignoreBuildErrors: false,
@@ -92,10 +99,11 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
-          // Security headers
+          // Security headers - Allow iframe embedding for preview
+          // In production, consider changing back to DENY if not needed
           {
             key: "X-Frame-Options",
-            value: "DENY",
+            value: "SAMEORIGIN",
           },
           {
             key: "X-Content-Type-Options",

@@ -128,13 +128,9 @@ const MALICIOUS_BOT_PATTERNS = [
   /gobuster/i,
   /wfuzz/i,
   /ffuf/i,
-  /headless/i,
-  /phantom/i,
-  /selenium/i,
-  /puppeteer/i,
-  /python-requests/i,
-  /curl/i,
-  /wget/i,
+  // Note: curl/wget/headless/phantom/selenium/puppeteer removed from blocking
+  // as they block legitimate preview agents and health checks.
+  // Only block actual attack tools above.
 ];
 
 const LEGITIMATE_BOT_PATTERNS = [
@@ -190,6 +186,10 @@ function getClientIP(request: NextRequest): string {
 function buildCSP(): string {
   const isDev = process.env.NODE_ENV === "development";
 
+  const frameAncestors = isDev
+    ? `frame-ancestors 'self' 'unsafe-inline' https://*.space-z.ai https://*.space.chatglm.site https://*.chatglm.site`
+    : `frame-ancestors 'self'`;
+
   const directives: string[] = [
     `default-src 'self'`,
     `script-src 'self' 'unsafe-inline' 'unsafe-eval'${isDev ? " localhost:*" : ""}`,
@@ -202,7 +202,7 @@ function buildCSP(): string {
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
-    `frame-ancestors 'none'`,
+    frameAncestors,
   ];
 
   if (!isDev) {
@@ -218,7 +218,8 @@ function getSecurityHeaders(): Record<string, string> {
   const isProduction = process.env.NODE_ENV === "production";
 
   return {
-    "X-Frame-Options": "DENY",
+    // Allow iframe embedding from preview domains in dev, same-origin in prod
+    "X-Frame-Options": isProduction ? "SAMEORIGIN" : "ALLOWALL",
     "X-Content-Type-Options": "nosniff",
     "X-XSS-Protection": "1; mode=block",
     "Referrer-Policy": "strict-origin-when-cross-origin",
@@ -238,9 +239,9 @@ function getSecurityHeaders(): Record<string, string> {
     ...(isProduction
       ? { "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload" }
       : {}),
-    "Cross-Origin-Opener-Policy": "same-origin",
-    "Cross-Origin-Resource-Policy": "same-origin",
-    "Cross-Origin-Embedder-Policy": "credentialless",
+    "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    "Cross-Origin-Resource-Policy": "cross-origin",
+    "Cross-Origin-Embedder-Policy": "unsafe-none",
   };
 }
 
@@ -248,6 +249,10 @@ function getSecurityHeaders(): Record<string, string> {
 
 const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  // Preview iframe domains
+  "https://space-z.ai",
+  "https://space.chatglm.site",
+  "https://chatglm.site",
 ];
 
 function getCORSHeaders(origin: string): Record<string, string> {
