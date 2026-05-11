@@ -249,10 +249,14 @@ function getSecurityHeaders(): Record<string, string> {
 
 const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  // Preview iframe domains
+  // Preview iframe domains (exact matches)
   "https://space-z.ai",
   "https://space.chatglm.site",
   "https://chatglm.site",
+  // Preview subdomain patterns (checked via startsWith)
+  "https://preview-chat-",
+  "https://preview-",
+  "http://localhost:",
 ];
 
 function getCORSHeaders(origin: string): Record<string, string> {
@@ -260,7 +264,14 @@ function getCORSHeaders(origin: string): Record<string, string> {
     (allowed) => origin === allowed || origin.startsWith(allowed)
   );
 
-  if (!isAllowed) return {};
+  // Also allow any subdomain of space-z.ai, space.chatglm.site, chatglm.site
+  const isPreviewDomain = [
+    ".space-z.ai",
+    ".space.chatglm.site",
+    ".chatglm.site",
+  ].some((domain) => origin.endsWith(domain) || origin.includes(domain + "/"));
+
+  if (!isAllowed && !isPreviewDomain) return {};
 
   return {
     "Access-Control-Allow-Origin": origin,
@@ -445,10 +456,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except:
-     * - _next/static (static files)
+     * - _next/static (static files) - handled by Next.js dev server CORS
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public files (images, etc.)
+     *
+     * Note: _next/static CORS is handled by allowedDevOrigins in next.config.ts
      */
     "/((?!_next/static|_next/image|favicon\\.ico|images/|fonts/).*)",
   ],
