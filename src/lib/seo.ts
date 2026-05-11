@@ -104,6 +104,13 @@ export const PAGE_KEYWORDS = {
     "reserve salon service Lahore",
     "bridal booking Lahore",
   ],
+  vip: [
+    "VIP membership salon Lahore",
+    "luxury salon membership Pakistan",
+    "exclusive beauty privileges",
+    "priority booking salon",
+    "Nabila VIP club",
+  ],
 } as const;
 
 // ─────────────────────────────────────────────────────────────
@@ -118,6 +125,7 @@ export const PAGE_DESCRIPTIONS = {
   about: `Learn about the vision, heritage, and artisan team behind ${SITE_NAME}. 18 years of excellence, 2,500+ brides transformed, and an unwavering commitment to beauty on M.M. Alam Road, Gulberg III.`,
   contact: `Get in touch with ${SITE_NAME}. Visit us at M.M. Alam Road, Gulberg III, Lahore, or call ${BRAND.phone}. We look forward to crafting your perfect beauty experience.`,
   booking: `Book your luxury beauty appointment at ${SITE_NAME}. Choose from our signature services, select your preferred artist, and reserve your slot in just a few steps.`,
+  vip: `Join the exclusive VIP membership at ${SITE_NAME}. Priority bookings, member-only rates, complimentary services, and personalized experiences reserved for our most valued clients.`,
 } as const;
 
 // ─────────────────────────────────────────────────────────────
@@ -132,13 +140,14 @@ export const PAGE_TITLES = {
   about: `About | ${SITE_NAME} - Our Story & Team`,
   contact: `Contact | ${SITE_NAME} - Appointments & Location`,
   booking: `Book Appointment | ${SITE_NAME} - Reserve Your Slot`,
+  vip: `VIP Membership | ${SITE_NAME} - Exclusive Privileges`,
 } as const;
 
 // ─────────────────────────────────────────────────────────────
 // METADATA GENERATORS PER PAGE
 // ─────────────────────────────────────────────────────────────
 
-type PageRoute = "home" | "bridal" | "services" | "gallery" | "about" | "contact" | "booking";
+type PageRoute = "home" | "bridal" | "services" | "gallery" | "about" | "contact" | "booking" | "vip";
 
 interface PageMetaOptions {
   page: PageRoute;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -254,7 +255,9 @@ function ServiceDetailModal({
 
             {/* CTA */}
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
-              <LuxuryButton size="md">Book This Service</LuxuryButton>
+              <Link href={`/booking?service=${service.id}`}>
+                <LuxuryButton size="md">Book This Service</LuxuryButton>
+              </Link>
               <a
                 href={`https://wa.me/923001234567?text=Hi, I'm interested in the ${service.title} service`}
                 target="_blank"
@@ -425,10 +428,18 @@ export default function ServicesPage() {
                 Book your consultation today and let our artisans craft an experience that is uniquely, beautifully yours.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <LuxuryButton size="lg">Book Appointment</LuxuryButton>
-                <LuxuryButton variant="outline" size="lg">
-                  WhatsApp Us
-                </LuxuryButton>
+                <Link href="/booking">
+                  <LuxuryButton size="lg">Book Appointment</LuxuryButton>
+                </Link>
+                <a
+                  href="https://wa.me/923001234567?text=Hi, I'd like to book an appointment"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <LuxuryButton variant="outline" size="lg">
+                    WhatsApp Us
+                  </LuxuryButton>
+                </a>
               </div>
             </RevealOnScroll>
           </div>

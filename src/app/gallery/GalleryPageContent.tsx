@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -190,7 +191,9 @@ export function GalleryPageContent() {
                 From the portfolio to your mirror. Book your appointment and let our artisans create your next stunning look.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <LuxuryButton size="lg">Book Appointment</LuxuryButton>
+                <Link href="/booking">
+                  <LuxuryButton size="lg">Book Appointment</LuxuryButton>
+                </Link>
                 <a
                   href={`https://wa.me/${BRAND.whatsapp}?text=Hi, I'd love to book a service after seeing your gallery`}
                   target="_blank"

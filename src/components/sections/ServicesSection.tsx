@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { SERVICES } from "@/lib/constants";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll, StaggerContainer, StaggerItem } from "@/components/ui/RevealOnScroll";
@@ -64,10 +65,11 @@ export function ServicesSection() {
         >
           {SERVICES.map((service) => (
             <StaggerItem key={service.id}>
+              <Link href={`/services?category=${service.id}`} className="block">
               <motion.div
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative bg-dark-card border border-champagne-gold/10 hover:border-champagne-gold/25 rounded-sm p-8 sm:p-10 transition-all duration-700 overflow-hidden"
+                className="group relative bg-dark-card border border-champagne-gold/10 hover:border-champagne-gold/25 rounded-sm p-8 sm:p-10 transition-all duration-700 overflow-hidden cursor-pointer"
               >
                 {/* Hover glow */}
                 <div className="absolute inset-0 bg-gradient-to-b from-champagne-gold/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -121,15 +123,18 @@ export function ServicesSection() {
                   <div className="absolute top-0 right-0 h-px w-8 bg-gradient-to-l from-champagne-gold/30 to-transparent" />
                 </div>
               </motion.div>
+              </Link>
             </StaggerItem>
           ))}
         </StaggerContainer>
 
         {/* CTA */}
         <RevealOnScroll className="mt-14 text-center">
-          <LuxuryButton variant="outline" size="md">
-            View All Services
-          </LuxuryButton>
+          <Link href="/services">
+            <LuxuryButton variant="outline" size="md">
+              View All Services
+            </LuxuryButton>
+          </Link>
         </RevealOnScroll>
       </div>
     </section>

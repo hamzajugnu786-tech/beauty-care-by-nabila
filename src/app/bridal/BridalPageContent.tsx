@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -164,14 +165,15 @@ export function BridalPageContent() {
 
                         {/* CTA */}
                         <div className="mt-8">
-                          <LuxuryButton
-                            size="md"
-                            variant={pkg.highlight ? "primary" : "outline"}
-                            className="w-full"
-                            onClick={() => setSelectedPackage(pkg.id)}
-                          >
-                            Select Package
-                          </LuxuryButton>
+                          <Link href={`/booking?package=${pkg.id}`}>
+                            <LuxuryButton
+                              size="md"
+                              variant={pkg.highlight ? "primary" : "outline"}
+                              className="w-full"
+                            >
+                              Select Package
+                            </LuxuryButton>
+                          </Link>
                         </div>
                       </div>
 
@@ -322,7 +324,9 @@ export function BridalPageContent() {
                 Book your bridal consultation today and let our artisans craft a transformation that will be cherished in photographs for generations to come.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
-                <LuxuryButton size="lg">Book Consultation</LuxuryButton>
+                <Link href="/booking?type=bridal">
+                  <LuxuryButton size="lg">Book Consultation</LuxuryButton>
+                </Link>
                 <a
                   href={`https://wa.me/${BRAND.whatsapp}?text=Hi, I'm interested in your bridal packages`}
                   target="_blank"
