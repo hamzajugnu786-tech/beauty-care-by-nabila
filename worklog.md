@@ -1,38 +1,46 @@
+# Beauty Care by Nabila — Work Log
+
 ---
-Task ID: 4
+Task ID: 5
 Agent: Main Agent
-Task: Phase 4 — Complete Luxury Booking System
+Task: Phase 5 — Complete Admin Dashboard and CMS Integration
 
 Work Log:
-- Explored current project state: found existing homepage, services page, rich constants, but zero booking infrastructure
-- Created booking types/interfaces at src/lib/types/booking.ts (BookingStatus, PaymentStatus, TimeSlot, BookingBranch, BookingFormData, Booking, BOOKING_STEPS)
-- Created Zustand booking store at src/stores/useBookingStore.ts with full multi-step state management, validation (canProceed), direction-aware transitions, devtools
-- Updated Prisma schema with Booking, Branch, ArtistAvailability, BlockedSlot, Service, Artist models
-- Pushed schema to SQLite database successfully
-- Created API route /api/availability with date validation, business hours logic, existing booking conflict checks, past-date prevention, 90-day max advance booking, simulated peak hour availability
-- Created API route /api/bookings with POST (create booking with conflict detection, unique confirmation code generation, slot blocking), GET (lookup by phone or confirmation code), PATCH (cancel, confirm, reschedule with slot management)
-- Created 7 reusable booking components:
-  - BookingStepIndicator: desktop horizontal stepper with active pulse + mobile compact progress bar
-  - BranchSelector: 3 branch cards with flagship badge, selection animation
-  - ServiceSelector: category-filtered grid with add-on selection, scrollable, animated
-  - ArtistPicker: artist cards with specialties, rating, "Any Available" option, category-based filtering
-  - DateTimePicker: horizontal scrollable date picker + time slots grouped by morning/afternoon/evening with availability checking
-  - ClientDetailsForm: validated form with name, phone (+92 prefix), email, notes, privacy notice
-  - BookingConfirmation: loading state, review state, success state with animated checkmark, confirmation code, booking summary, WhatsApp + Call actions
-- Created WhatsAppConcierge: floating FAB with expandable chat panel, quick messages, custom message input, WhatsApp deep link integration
-- Created booking page at /booking with: PageHero, step indicator, animated step transitions (direction-aware), error banners, smart recommendations, booking status lookup, navigation with back/continue, confirmation flow
-- Updated Navbar to wire "Book Now" and "Book Appointment" buttons to /booking route
-- Build verified successfully — all routes compile and generate
+- Explored existing project structure (Next.js 16, Prisma/SQLite, shadcn/ui, Zustand, Framer Motion, Recharts)
+- Created Firebase client SDK config (src/lib/firebase.ts) and Firebase Admin SDK (src/lib/firebase-admin.ts)
+- Created admin type definitions (src/lib/types/admin.ts) with AdminRole, DashboardStats, CRUD types, navigation config, Firestore collection names, booking/payment status configs
+- Created NextAuth configuration (src/lib/auth.ts) with Firebase credentials provider and JWT session strategy
+- Created auth API route (src/app/api/auth/[...nextauth]/route.ts)
+- Created admin role API endpoint (src/app/api/admin/auth/role/route.ts) with role-based permissions
+- Created middleware (src/middleware.ts) for route protection with role-based access control
+- Created Sanity CMS client (src/lib/sanity/client.ts) with GROQ queries for all content types
+- Created 8 Sanity schemas: post, author, service, testimonial, galleryImage, siteSettings, staffMember, seoFields
+- Created admin Zustand store (src/stores/useAdminStore.ts) for auth, sidebar, search, notifications state
+- Created Providers component (src/components/Providers.tsx) wrapping SessionProvider + QueryClientProvider
+- Updated root layout to include Providers
+- Created admin login page (src/app/admin/login/page.tsx) with cinematic brand design, demo login buttons
+- Created premium admin layout (src/app/admin/layout.tsx) with animated sidebar, header, notifications, responsive mobile drawer
+- Created analytics dashboard (src/app/admin/page.tsx) with KPI cards, revenue chart, service breakdown pie chart, recent bookings, top performers, bookings by day bar chart
+- Created bookings management (src/app/admin/bookings/page.tsx) with search, status filter tabs, desktop table + mobile cards, booking detail drawer with actions (confirm/reschedule/cancel/WhatsApp)
+- Created services management (src/app/admin/services/page.tsx) with category filters, service cards, create/edit modal with features & add-ons management
+- Created staff management (src/app/admin/staff/page.tsx) with staff cards, create/edit modal, specialty management, rating display
+- Created gallery management (src/app/admin/gallery/page.tsx) with masonry/grid view toggle, upload zone, image detail drawer, featured toggle
+- Created testimonials management (src/app/admin/testimonials/page.tsx) with testimonial cards, create/edit modal, star rating picker
+- Created blog & SEO management (src/app/admin/blog/page.tsx) with post list, create/edit modal, integrated SEO panel with meta fields, keywords, no-index toggle
+- Created settings page (src/app/admin/settings/page.tsx) with brand info, system integrations, notification preferences tabs
+- Created 6 admin API routes: analytics, bookings, services, staff, gallery, testimonials, blog — all with full CRUD operations
+- Installed firebase, firebase-admin, next-sanity, @sanity/image-url, @sanity/client packages
+- Updated .env with all Firebase, NextAuth, Sanity, Cloudinary environment variables
+- Added force-dynamic export to all admin pages to prevent static rendering issues
+- Verified build succeeds with all 25 routes
 
 Stage Summary:
-- Complete 6-step booking flow: Branch → Service → Artist → Date/Time → Details → Confirm
-- Full API backend with conflict detection, slot blocking, confirmation codes
-- Prisma schema with 6 new models (Booking, Branch, ArtistAvailability, BlockedSlot, Service, Artist)
-- Zustand store with devtools, step management, validation
-- 7 reusable booking components with luxury design language
-- Floating WhatsApp concierge with quick messages
-- Smart recommendations based on service category
-- Booking status lookup by confirmation code
-- Cancellation and reschedule API support
-- All animations use luxury easing [0.16, 1, 0.3, 1]
-- Build passes cleanly with 0 errors
+- Complete admin dashboard and CMS integration built
+- 8 admin pages: Dashboard, Bookings, Services, Staff, Gallery, Testimonials, Blog/SEO, Settings
+- 7 admin API routes with full CRUD
+- Firebase Auth + NextAuth authentication with 3 roles (super-admin, manager, staff)
+- Role-based route protection via middleware
+- Sanity CMS schemas for 7 content types + reusable SEO fields
+- Premium dark luxury UI matching the brand's matte-black + champagne-gold aesthetic
+- All pages responsive with mobile sidebar, cards, and drawers
+- Build succeeds with zero errors
