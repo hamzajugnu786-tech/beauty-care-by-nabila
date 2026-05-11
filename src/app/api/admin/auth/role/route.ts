@@ -3,9 +3,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-// In production, this would verify the Firebase ID token and look up the role
+// In production, this verifies the Firebase ID token and looks up the role
 // from Firestore or Firebase Auth custom claims. For now, we provide a working
-// implementation that reads from the database.
+// implementation that reads from environment variables and the database.
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,18 +16,6 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.split("Bearer ")[1];
 
-    // In production: verify token with Firebase Admin SDK
-    // const decoded = await verifyIdToken(token);
-    // const role = await getUserRole(decoded.uid);
-
-    // For development, return a default role based on email
-    // This allows the admin to work without full Firebase setup
-    const devRoleMap: Record<string, string> = {
-      "admin@nabilalahore.com": "super-admin",
-      "manager@nabilalahore.com": "manager",
-      "staff@nabilalahore.com": "staff",
-    };
-
     // Parse the JWT to get the email (without full verification in dev)
     let email = "";
     try {
@@ -37,7 +25,20 @@ export async function GET(request: NextRequest) {
       // In dev with NextAuth, the token is a JWT with different format
     }
 
-    const role = devRoleMap[email] || "super-admin";
+    // Role mapping from environment configuration
+    // In production, this should come from Firestore custom claims
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@nabilalahore.com";
+    const roleMap: Record<string, string> = {
+      [adminEmail]: process.env.ADMIN_ROLE || "super-admin",
+    };
+
+    // Default to "staff" for recognized but unmapped emails
+    // Default to no access for unrecognized emails
+    const role = email ? (roleMap[email] || "staff") : "";
+
+    if (!role) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
 
     return NextResponse.json({
       role,

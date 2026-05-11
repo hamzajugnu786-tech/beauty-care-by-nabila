@@ -21,6 +21,9 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Only show demo login in development mode
+  const isDev = process.env.NODE_ENV === "development";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -46,8 +49,9 @@ export default function AdminLoginPage() {
     }
   };
 
-  // Demo quick-login buttons (remove in production)
+  // Demo quick-login buttons — DEVELOPMENT ONLY
   const handleDemoLogin = (role: string) => {
+    if (!isDev) return;
     const demoEmails: Record<string, string> = {
       "super-admin": "admin@nabilalahore.com",
       manager: "manager@nabilalahore.com",
@@ -104,7 +108,7 @@ export default function AdminLoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@nabilalahore.com"
+                  placeholder="Enter your email"
                   className="w-full pl-11 pr-4 py-3 bg-dark-elevated border border-border-gold/20 rounded-xl text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-champagne-gold/50 focus:ring-1 focus:ring-champagne-gold/20 transition-all"
                   required
                 />
@@ -169,23 +173,25 @@ export default function AdminLoginPage() {
             </motion.button>
           </form>
 
-          {/* Demo Logins */}
-          <div className="mt-6 pt-6 border-t border-border-gold/10">
-            <p className="text-text-muted/60 text-xs text-center mb-3 uppercase tracking-wider">
-              Demo Access
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {(["super-admin", "manager", "staff"] as const).map((role) => (
-                <button
-                  key={role}
-                  onClick={() => handleDemoLogin(role)}
-                  className="px-3 py-2 bg-dark-elevated border border-border-gold/10 rounded-lg text-xs text-text-muted hover:text-champagne-gold hover:border-champagne-gold/20 transition-all capitalize"
-                >
-                  {role.replace("-", " ")}
-                </button>
-              ))}
+          {/* Demo Logins — Development Only */}
+          {isDev && (
+            <div className="mt-6 pt-6 border-t border-border-gold/10">
+              <p className="text-text-muted/60 text-xs text-center mb-3 uppercase tracking-wider">
+                Demo Access (Development Only)
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {(["super-admin", "manager", "staff"] as const).map((role) => (
+                  <button
+                    key={role}
+                    onClick={() => handleDemoLogin(role)}
+                    className="px-3 py-2 bg-dark-elevated border border-border-gold/10 rounded-lg text-xs text-text-muted hover:text-champagne-gold hover:border-champagne-gold/20 transition-all capitalize"
+                  >
+                    {role.replace("-", " ")}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer */}

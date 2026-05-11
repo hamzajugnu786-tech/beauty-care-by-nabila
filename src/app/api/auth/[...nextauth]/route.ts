@@ -11,12 +11,21 @@ const isFirebaseConfigured =
   process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
   process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID !== "your-project-id";
 
+// Validate NextAuth secret is available
+const nextAuthSecret = process.env.NEXTAUTH_SECRET;
+if (!nextAuthSecret && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "NEXTAUTH_SECRET environment variable is required in production. " +
+    "Generate one with: openssl rand -base64 32"
+  );
+}
+
 const handler = isFirebaseConfigured
   ? NextAuth(authOptions)
   : NextAuth({
       ...authOptions,
       providers: [], // No providers if Firebase not configured
-      secret: process.env.NEXTAUTH_SECRET || "dev-secret-key-for-session",
+      secret: nextAuthSecret || undefined, // Let NextAuth handle dev mode internally
     });
 
 export { handler as GET, handler as POST };

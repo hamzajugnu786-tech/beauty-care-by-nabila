@@ -9,21 +9,15 @@ const nextConfig: NextConfig = {
   // Remove X-Powered-By header for security
   poweredByHeader: false,
 
-  // Allow cross-origin requests from preview iframe
-  // Must include both hostname-only and protocol-prefixed formats
-  // for Next.js dev server to properly match preview origins
+  // Development-only: Allow cross-origin requests from preview iframe
+  // These are only needed during development and do not affect production
   allowedDevOrigins: [
-    // Hostname-only format (suffix match for subdomains)
     ".space-z.ai",
     ".space.chatglm.site",
     ".chatglm.site",
-    // Protocol-prefixed format (full origin match)
     "https://.space-z.ai",
     "https://.space.chatglm.site",
     "https://.chatglm.site",
-    // Current session preview domain
-    "preview-chat-26537831-ff56-410a-a33f-5ee25df7ad77.space-z.ai",
-    "https://preview-chat-26537831-ff56-410a-a33f-5ee25df7ad77.space-z.ai",
   ],
 
   // Enable TypeScript strict checking in builds

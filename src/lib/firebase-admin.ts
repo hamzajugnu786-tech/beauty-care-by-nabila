@@ -12,10 +12,10 @@ if (!admin.apps.length) {
     privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n"),
   };
 
-  // In dev without real credentials, initialize with minimal config
+  // In dev without real credentials, initialize with placeholder config
   if (process.env.NODE_ENV === "development" && !serviceAccount.projectId) {
     adminApp = admin.initializeApp({
-      projectId: "nabila-salon-dev",
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "nabila-lahore-dev",
     });
   } else {
     adminApp = admin.initializeApp({

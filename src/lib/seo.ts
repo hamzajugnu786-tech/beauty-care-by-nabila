@@ -5,7 +5,7 @@ import { BRAND, SERVICES, DETAILED_SERVICES } from "./constants";
 // SITE-WIDE CONSTANTS
 // ─────────────────────────────────────────────────────────────
 
-export const SITE_URL = "https://nabilalahore.com";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nabilalahore.com";
 export const SITE_NAME = "Beauty Care by Nabila Lahore";
 export const SITE_LOCALE = "en_PK";
 export const SITE_LANGUAGE = "en";
