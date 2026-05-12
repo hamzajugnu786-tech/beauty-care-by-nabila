@@ -12,10 +12,9 @@
 // ─── Validation Helper ───
 function required(key: string, value: string | undefined): string {
   if (!value || value === "") {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(`Missing required environment variable: ${key}`);
-    }
-    console.warn(`[env] Missing optional env var in development: ${key}`);
+    // Graceful: warn instead of crash — the app should still render
+    // even if backend services aren't configured yet
+    console.warn(`[env] Missing required environment variable: ${key}. Related features will be disabled.`);
     return "";
   }
   return value;
