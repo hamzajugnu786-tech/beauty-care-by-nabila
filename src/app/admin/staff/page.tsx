@@ -7,7 +7,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Search, Edit3, Trash2, X, Save, Star, ToggleLeft, ToggleRight,
-  Phone, Mail, Award, User,
+  Phone, Mail, Award, User, Upload, Camera,
 } from "lucide-react";
 import { BRIDAL_ARTISTS } from "@/lib/constants";
 
@@ -58,6 +58,7 @@ export default function StaffPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<StaffMember>(emptyStaff);
   const [newSpecialty, setNewSpecialty] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const filtered = staff.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -117,8 +118,12 @@ export default function StaffPage() {
             className={`bg-dark-card border border-border-gold/10 rounded-2xl p-5 transition-all group hover:border-champagne-gold/20 ${!member.isActive ? "opacity-50" : ""}`}>
             {/* Avatar + Info */}
             <div className="flex items-start gap-4 mb-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-champagne-gold/20 to-champagne-gold/5 flex items-center justify-center text-champagne-gold text-lg font-serif flex-shrink-0 border border-champagne-gold/10">
-                {member.name.charAt(0)}
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-champagne-gold/20 to-champagne-gold/5 flex items-center justify-center text-champagne-gold text-lg font-serif flex-shrink-0 border border-champagne-gold/10 overflow-hidden">
+                {member.image ? (
+                  <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+                ) : (
+                  member.name.charAt(0)
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -229,6 +234,45 @@ export default function StaffPage() {
                     <label className="text-xs text-text-muted uppercase tracking-wider mb-1.5 block">Email</label>
                     <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-2.5 bg-dark-card border border-border-gold/10 rounded-xl text-sm text-text-primary focus:outline-none focus:border-champagne-gold/30" />
+                  </div>
+                </div>
+
+                {/* Photo Upload */}
+                <div>
+                  <label className="text-xs text-text-muted uppercase tracking-wider mb-1.5 block">Photo</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-champagne-gold/20 to-champagne-gold/5 flex items-center justify-center border border-champagne-gold/10 overflow-hidden flex-shrink-0">
+                      {formData.image ? (
+                        <img src={formData.image} alt={formData.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Camera className="w-5 h-5 text-champagne-gold/40" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <label className="inline-flex items-center gap-2 px-4 py-2 bg-dark-card border border-border-gold/10 rounded-xl text-sm text-text-muted hover:text-champagne-gold hover:border-champagne-gold/30 cursor-pointer transition-all">
+                        <Upload className="w-4 h-4" />
+                        {uploading ? "Uploading..." : "Upload Photo"}
+                        <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploading(true);
+                          try {
+                            const uploadForm = new FormData();
+                            uploadForm.append("file", file);
+                            uploadForm.append("folder", "nabila-staff");
+                            uploadForm.append("title", formData.name);
+                            const res = await fetch("/api/cloudinary", { method: "POST", body: uploadForm });
+                            if (res.ok) {
+                              const data = await res.json();
+                              setFormData({ ...formData, image: data.url });
+                            }
+                          } catch {} finally { setUploading(false); }
+                        }} />
+                      </label>
+                      {formData.image && (
+                        <button onClick={() => setFormData({ ...formData, image: "" })} className="ml-3 text-xs text-red-400 hover:text-red-300">Remove</button>
+                      )}
+                    </div>
                   </div>
                 </div>
 

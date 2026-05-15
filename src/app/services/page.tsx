@@ -145,7 +145,7 @@ function ServiceDetailModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-50 bg-matte-black/90 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6"
+        className="fixed inset-0 z-[60] bg-matte-black/90 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6"
         onClick={onClose}
       >
         <motion.div

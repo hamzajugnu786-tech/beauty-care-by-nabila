@@ -67,21 +67,42 @@ export default function GalleryPage() {
     setGallery(gallery.filter((g) => g.id !== id));
 
   const handleUpload = () => {
-    setIsUploading(true);
-    // Simulate upload
-    setTimeout(() => {
-      const newItem: GalleryItem = {
-        id: Date.now(),
-        src: "/images/gallery-new.jpg",
-        alt: "Newly uploaded image",
-        category: categoryFilter !== "all" ? categoryFilter : "bridal",
-        height: ["tall", "medium", "short"][Math.floor(Math.random() * 3)] as any,
-        featured: false,
-        isActive: true,
-      };
-      setGallery([newItem, ...gallery]);
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
+    input.onchange = async (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files) return;
+      setIsUploading(true);
+      for (const file of Array.from(files)) {
+        try {
+          const uploadForm = new FormData();
+          uploadForm.append("file", file);
+          uploadForm.append("folder", "nabila-gallery");
+          uploadForm.append("title", file.name.replace(/\.[^/.]+$/, ""));
+          uploadForm.append("category", categoryFilter !== "all" ? categoryFilter : "bridal");
+          const res = await fetch("/api/cloudinary", { method: "POST", body: uploadForm });
+          if (res.ok) {
+            const data = await res.json();
+            const newItem: GalleryItem = {
+              id: Date.now() + Math.random(),
+              src: data.url,
+              alt: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
+              category: categoryFilter !== "all" ? categoryFilter : "bridal",
+              height: ["tall", "medium", "short"][Math.floor(Math.random() * 3)] as any,
+              featured: false,
+              isActive: true,
+            };
+            setGallery((prev) => [newItem, ...prev]);
+          }
+        } catch (err) {
+          console.error("Upload failed:", err);
+        }
+      }
       setIsUploading(false);
-    }, 1500);
+    };
+    input.click();
   };
 
   return (
@@ -146,9 +167,13 @@ export default function GalleryPage() {
                   img.featured ? "border-champagne-gold/30" : "border-border-gold/10"
                 } ${!img.isActive ? "opacity-40" : ""}`}
                 onClick={() => setSelectedItem(img)}>
-                {/* Placeholder Image */}
-                <div className={`${heightMap[img.height]} bg-gradient-to-br from-dark-elevated to-dark-card flex items-center justify-center`}>
-                  <ImageIcon className="w-8 h-8 text-text-muted/20" />
+                {/* Image or Placeholder */}
+                <div className={`${heightMap[img.height]} bg-gradient-to-br from-dark-elevated to-dark-card flex items-center justify-center overflow-hidden`}>
+                  {img.src && !img.src.startsWith("/images") ? (
+                    <img src={img.src} alt={img.alt} className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="w-8 h-8 text-text-muted/20" />
+                  )}
                 </div>
 
                 {/* Overlay */}
@@ -188,8 +213,12 @@ export default function GalleryPage() {
                   img.featured ? "border-champagne-gold/30" : "border-border-gold/10"
                 } ${!img.isActive ? "opacity-40" : ""}`}
                 onClick={() => setSelectedItem(img)}>
-                <div className="w-full h-full bg-gradient-to-br from-dark-elevated to-dark-card flex items-center justify-center">
-                  <ImageIcon className="w-8 h-8 text-text-muted/20" />
+                <div className="w-full h-full bg-gradient-to-br from-dark-elevated to-dark-card flex items-center justify-center overflow-hidden">
+                  {img.src && !img.src.startsWith("/images") ? (
+                    <img src={img.src} alt={img.alt} className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="w-8 h-8 text-text-muted/20" />
+                  )}
                 </div>
                 <div className="absolute inset-0 bg-matte-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button className="p-2 bg-dark-surface/80 rounded-lg"><Eye className="w-4 h-4 text-text-primary" /></button>
@@ -228,8 +257,12 @@ export default function GalleryPage() {
                 </div>
 
                 {/* Preview */}
-                <div className="aspect-video rounded-xl bg-dark-card border border-border-gold/10 flex items-center justify-center mb-6">
-                  <ImageIcon className="w-16 h-16 text-text-muted/20" />
+                <div className="aspect-video rounded-xl bg-dark-card border border-border-gold/10 flex items-center justify-center mb-6 overflow-hidden">
+                  {selectedItem.src && !selectedItem.src.startsWith("/images") ? (
+                    <img src={selectedItem.src} alt={selectedItem.alt} className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="w-16 h-16 text-text-muted/20" />
+                  )}
                 </div>
 
                 {/* Info */}

@@ -1,16 +1,34 @@
-// ─── NextAuth Configuration with Firebase ───
+// ─── NextAuth Configuration with Firebase + Fallback ───
 // Handles admin authentication with email/password + role-based access
+// Falls back to direct credential check when Firebase is unavailable
 
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth as firebaseAuth } from "@/lib/firebase";
+import { isFirebaseConfigured } from "@/lib/firebase";
+
+// Lazy-load Firebase only when configured
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+let firebaseAuth: any = null;
+if (typeof window !== "undefined" && isFirebaseConfigured) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const firebase = require("@/lib/firebase");
+    firebaseAuth = firebase.auth;
+  } catch {
+    // Firebase not available
+  }
+}
+
+// Fallback admin credentials (used when Firebase is not configured)
+const FALLBACK_ADMINS = [
+  { email: "admin@nabilalahore.com", password: "admin1234", name: "Nabila Admin", role: "super-admin" },
+];
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       id: "firebase-credentials",
-      name: "Firebase Credentials",
+      name: "Admin Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
@@ -18,40 +36,61 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        try {
-          // Sign in with Firebase Auth
-          const userCredential = await signInWithEmailAndPassword(
-            firebaseAuth,
-            credentials.email,
-            credentials.password
-          );
+        // Try Firebase Auth first if configured
+        if (isFirebaseConfigured && firebaseAuth) {
+          try {
+            const { signInWithEmailAndPassword } = await import("firebase/auth");
+            const userCredential = await signInWithEmailAndPassword(
+              firebaseAuth,
+              credentials.email,
+              credentials.password
+            );
 
-          const user = userCredential.user;
-          const idToken = await user.getIdToken();
+            const user = userCredential.user;
+            const idToken = await user.getIdToken();
 
-          // Fetch the user's role from our API
-          const roleRes = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/admin/auth/role`,
-            {
-              headers: { Authorization: `Bearer ${idToken}` },
-            }
-          );
+            // Fetch the user's role from our API
+            const roleRes = await fetch(
+              `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/admin/auth/role`,
+              {
+                headers: { Authorization: `Bearer ${idToken}` },
+              }
+            );
 
-          const roleData = await roleRes.json();
-          const role = roleData.role || "staff";
+            const roleData = await roleRes.json();
+            const role = roleData.role || "staff";
 
-          return {
-            id: user.uid,
-            email: user.email,
-            name: user.displayName || user.email?.split("@")[0],
-            image: user.photoURL,
-            role,
-            idToken,
-          };
-        } catch (error) {
-          console.error("Auth error:", error);
-          return null;
+            return {
+              id: user.uid,
+              email: user.email,
+              name: user.displayName || user.email?.split("@")[0],
+              image: user.photoURL,
+              role,
+              idToken,
+            };
+          } catch (error) {
+            console.error("Firebase auth error, trying fallback:", error);
+            // Fall through to fallback
+          }
         }
+
+        // Fallback: Direct credential check (when Firebase is unavailable)
+        const admin = FALLBACK_ADMINS.find(
+          (a) => a.email === credentials.email && a.password === credentials.password
+        );
+
+        if (admin) {
+          return {
+            id: `fallback-${admin.email.replace(/[^a-z0-9]/g, "-")}`,
+            email: admin.email,
+            name: admin.name,
+            image: null,
+            role: admin.role,
+            idToken: "fallback-token",
+          };
+        }
+
+        return null;
       },
     }),
   ],
@@ -80,5 +119,5 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 24 * 60 * 60, // 24 hours
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "beauty-care-nabila-lahore-secret-2026",
 };

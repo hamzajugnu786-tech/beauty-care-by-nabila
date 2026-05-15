@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GALLERY_IMAGES } from "@/lib/constants";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
@@ -9,16 +9,40 @@ import { LuxuryButton } from "@/components/ui/LuxuryButton";
 
 const CATEGORIES = ["all", "bridal", "hair", "makeup", "skincare", "nails", "spa"] as const;
 
+interface CloudinaryImage {
+  id: string;
+  src: string;
+  alt: string;
+  category: string;
+  height: string;
+  featured: boolean;
+}
+
 export function GallerySection() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [cloudinaryImages, setCloudinaryImages] = useState<CloudinaryImage[]>([]);
+
+  useEffect(() => {
+    fetch("/api/gallery")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.images && data.images.length > 0) {
+          setCloudinaryImages(data.images);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Use Cloudinary images if available, otherwise fall back to constants
+  const allImages = cloudinaryImages.length > 0 ? cloudinaryImages : GALLERY_IMAGES;
 
   const filteredImages = useMemo(
     () =>
       activeCategory === "all"
-        ? GALLERY_IMAGES
-        : GALLERY_IMAGES.filter((img) => img.category === activeCategory),
-    [activeCategory]
+        ? allImages
+        : allImages.filter((img) => img.category === activeCategory),
+    [activeCategory, allImages]
   );
 
   return (
@@ -70,9 +94,16 @@ export function GallerySection() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05, duration: 0.4 }}
               className="group relative aspect-square overflow-hidden rounded-sm cursor-pointer bg-dark-card border border-champagne-gold/5 hover:border-champagne-gold/20 transition-all duration-700"
-              onClick={() => setSelectedImage(image.id)}
+              onClick={() => setSelectedImage(typeof image.id === 'string' ? image.id : String(image.id))}
             >
-              {/* Placeholder with gradient */}
+              {/* Real image or placeholder */}
+              {("src" in image && (image as CloudinaryImage).src) ? (
+                <img
+                  src={(image as CloudinaryImage).src}
+                  alt={image.alt}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+              ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-dark-card via-dark-elevated/50 to-dark-card">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-10 h-10 rounded-full border border-champagne-gold/15 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
@@ -92,6 +123,7 @@ export function GallerySection() {
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -125,7 +157,7 @@ export function GallerySection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+              className="fixed inset-0 z-[60] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4"
               onClick={() => setSelectedImage(null)}
             >
               <motion.div
@@ -136,11 +168,20 @@ export function GallerySection() {
                 className="relative max-w-4xl w-full aspect-[4/3] bg-dark-card rounded-sm border border-champagne-gold/20 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="font-[family-name:var(--font-cormorant)] text-xl text-champagne-gold/40 italic">
-                    {GALLERY_IMAGES.find((img) => img.id === selectedImage)?.alt}
-                  </p>
-                </div>
+                {/* Real image or placeholder in lightbox */}
+                {(() => {
+                  const img = allImages.find((i) => (typeof i.id === 'string' ? i.id : String(i.id)) === selectedImage);
+                  const cloudImg = img as CloudinaryImage | undefined;
+                  return cloudImg?.src ? (
+                    <img src={cloudImg.src} alt={img?.alt || "Gallery image"} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <p className="font-[family-name:var(--font-cormorant)] text-xl text-champagne-gold/40 italic">
+                        {img?.alt}
+                      </p>
+                    </div>
+                  );
+                })()}
                 <button
                   onClick={() => setSelectedImage(null)}
                   className="absolute top-4 right-4 w-10 h-10 rounded-full border border-champagne-gold/20 flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-500"
