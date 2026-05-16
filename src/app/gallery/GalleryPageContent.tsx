@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -89,18 +90,15 @@ export function GalleryPageContent() {
                   className="mb-4 sm:mb-5 break-inside-avoid group"
                 >
                   <div className="relative overflow-hidden rounded-sm bg-dark-card border border-champagne-gold/8 hover:border-champagne-gold/20 transition-all duration-700">
-                    {/* Image placeholder with aspect ratio */}
+                    {/* Image with aspect ratio */}
                     <div className={`${aspectMap[item.height]} relative overflow-hidden`}>
-                      <div className="absolute inset-0 bg-gradient-to-br from-champagne-gold/[0.03] to-dark-card flex items-center justify-center">
-                        <div className="text-center">
-                          <svg className="w-8 h-8 text-champagne-gold/20 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25a1.5 1.5 0 001.5 1.5z" />
-                          </svg>
-                          <p className="mt-2 font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.2em] text-champagne-gold/25">
-                            {item.category}
-                          </p>
-                        </div>
-                      </div>
+                      <Image
+                        src={item.src}
+                        alt={item.alt}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
 
                       {/* Hover overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-matte-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

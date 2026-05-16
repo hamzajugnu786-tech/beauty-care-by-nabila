@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { LuxuryButton } from "@/components/ui/LuxuryButton";
@@ -62,32 +63,16 @@ export function BridalShowcase() {
           {/* Left: Visual */}
           <RevealOnScroll direction="left">
             <div className="relative">
-              {/* Main image placeholder */}
+              {/* Main image */}
               <div className="relative aspect-[3/4] rounded-sm overflow-hidden bg-dark-card border border-champagne-gold/10">
-                <div className="absolute inset-0 bg-gradient-to-br from-champagne-gold/10 via-dark-surface to-dark-card" />
-                {/* Placeholder content */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-20 h-20 mx-auto rounded-full border border-champagne-gold/20 flex items-center justify-center mb-4">
-                      <svg
-                        className="w-8 h-8 text-champagne-gold/40"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M2.25 21h19.5M3.75 21V7.5l4.5 3 4.5-6 4.5 6 4.5-3V21"
-                        />
-                      </svg>
-                    </div>
-                    <p className="font-[family-name:var(--font-cormorant)] text-lg text-champagne-gold/40 italic">
-                      Bridal Portfolio
-                    </p>
-                  </div>
-                </div>
+                <Image
+                  src="/images/bridal-showcase.jpg"
+                  alt="Bridal Portfolio - Beauty Care by Nabila"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
                 {/* Gold corner accents */}
                 <div className="absolute top-3 left-3 w-8 h-8 border-t border-l border-champagne-gold/30" />
                 <div className="absolute bottom-3 right-3 w-8 h-8 border-b border-r border-champagne-gold/30" />

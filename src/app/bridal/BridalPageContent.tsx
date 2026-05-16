@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -212,17 +213,16 @@ export function BridalPageContent() {
                     whileHover={{ y: -6 }}
                     className="group bg-dark-card border border-champagne-gold/10 hover:border-champagne-gold/25 rounded-sm overflow-hidden transition-all duration-700"
                   >
-                    {/* Artist image placeholder */}
+                    {/* Artist image */}
                     <div className="relative h-64 bg-gradient-to-b from-champagne-gold/[0.06] to-dark-card overflow-hidden">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-20 h-20 rounded-full border border-champagne-gold/20 flex items-center justify-center">
-                          <svg className="w-8 h-8 text-champagne-gold/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                          </svg>
-                        </div>
-                      </div>
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-champagne-gold/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                      <Image
+                        src={artist.image}
+                        alt={artist.name}
+                        fill
+                        className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-dark-card/80 via-transparent to-transparent" />
                     </div>
 
                     <div className="p-6">

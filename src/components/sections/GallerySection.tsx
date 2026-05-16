@@ -106,21 +106,19 @@ export function GallerySection() {
               ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-dark-card via-dark-elevated/50 to-dark-card">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-full border border-champagne-gold/15 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
-                    <svg
-                      className="w-4 h-4 text-champagne-gold/30 group-hover:text-champagne-gold/50 transition-colors duration-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v15a1.5 1.5 0 001.5 1.5z"
-                      />
-                    </svg>
-                  </div>
+                  <svg
+                    className="w-8 h-8 text-champagne-gold/20 group-hover:text-champagne-gold/40 transition-colors duration-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v15a1.5 1.5 0 001.5 1.5z"
+                    />
+                  </svg>
                 </div>
               </div>
               )}
@@ -157,7 +155,7 @@ export function GallerySection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+              className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4"
               onClick={() => setSelectedImage(null)}
             >
               <motion.div
@@ -184,7 +182,7 @@ export function GallerySection() {
                 })()}
                 <button
                   onClick={() => setSelectedImage(null)}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full border border-champagne-gold/20 flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-500"
+                  className="absolute -top-12 right-0 sm:top-4 sm:right-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/80 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 hover:bg-matte-black transition-all duration-300 z-10"
                   aria-label="Close lightbox"
                 >
                   <svg

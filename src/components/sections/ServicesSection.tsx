@@ -1,7 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { SERVICES } from "@/lib/constants";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll, StaggerContainer, StaggerItem } from "@/components/ui/RevealOnScroll";
@@ -41,6 +43,8 @@ const serviceIcons: Record<string, React.ReactElement> = {
 };
 
 export function ServicesSection() {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   return (
     <section className="section-gap section-padding relative overflow-hidden">
       {/* Background */}
@@ -63,69 +67,118 @@ export function ServicesSection() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
           staggerDelay={0.1}
         >
-          {SERVICES.map((service) => (
-            <StaggerItem key={service.id}>
-              <Link href={`/services?category=${service.id}`} className="block">
-              <motion.div
-                whileHover={{ y: -4 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative bg-dark-card border border-champagne-gold/10 hover:border-champagne-gold/25 rounded-sm p-8 sm:p-10 transition-all duration-700 overflow-hidden cursor-pointer"
-              >
-                {/* Hover glow */}
-                <div className="absolute inset-0 bg-gradient-to-b from-champagne-gold/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                {/* Content */}
-                <div className="relative z-10">
-                  {/* Icon */}
-                  <div className="w-12 h-12 rounded-full border border-champagne-gold/20 flex items-center justify-center text-champagne-gold mb-6 group-hover:border-champagne-gold/40 transition-colors duration-500">
-                    {serviceIcons[service.icon] || serviceIcons.sparkles}
+          {SERVICES.map((service) => {
+            const isExpanded = expandedId === service.id;
+            return (
+              <StaggerItem key={service.id}>
+                <motion.div
+                  layout
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="group relative bg-dark-card border border-champagne-gold/10 hover:border-champagne-gold/25 rounded-sm overflow-hidden cursor-pointer transition-all duration-700"
+                  onClick={() => setExpandedId(isExpanded ? null : service.id)}
+                >
+                  {/* Service Background Image */}
+                  <div className="relative h-48 sm:h-56 overflow-hidden">
+                    <Image
+                      src={service.image}
+                      alt={service.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                    {/* Dark overlay for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/60 to-transparent" />
+                    {/* Icon badge */}
+                    <div className="absolute top-4 left-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/60 backdrop-blur-sm flex items-center justify-center text-champagne-gold">
+                      {serviceIcons[service.icon] || serviceIcons.sparkles}
+                    </div>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="font-[family-name:var(--font-playfair)] text-xl sm:text-2xl font-medium text-text-primary group-hover:text-champagne-gold transition-colors duration-500">
-                    {service.title}
-                  </h3>
+                  {/* Content */}
+                  <div className="relative z-10 p-6 sm:p-8">
+                    {/* Title */}
+                    <h3 className="font-[family-name:var(--font-playfair)] text-xl sm:text-2xl font-medium text-text-primary group-hover:text-champagne-gold transition-colors duration-500">
+                      {service.title}
+                    </h3>
 
-                  {/* Description */}
-                  <p className="mt-3 font-[family-name:var(--font-cormorant)] text-base text-text-muted leading-relaxed">
-                    {service.description}
-                  </p>
+                    {/* Description */}
+                    <p className="mt-3 font-[family-name:var(--font-cormorant)] text-base text-text-muted leading-relaxed">
+                      {service.description}
+                    </p>
 
-                  {/* Price */}
-                  <div className="mt-6 flex items-center justify-between">
-                    <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60">
-                      {service.price}
-                    </span>
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      className="w-8 h-8 flex items-center justify-center text-champagne-gold/40 group-hover:text-champagne-gold transition-colors duration-500"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
+                    {/* Price & Arrow */}
+                    <div className="mt-6 flex items-center justify-between">
+                      <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60">
+                        {service.price}
+                      </span>
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 90 : 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-8 h-8 flex items-center justify-center text-champagne-gold/40 group-hover:text-champagne-gold transition-colors duration-500"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                        />
-                      </svg>
-                    </motion.div>
-                  </div>
-                </div>
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={1.5}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
+                          />
+                        </svg>
+                      </motion.div>
+                    </div>
 
-                {/* Corner accent */}
-                <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden">
-                  <div className="absolute top-0 right-0 w-px h-8 bg-gradient-to-b from-champagne-gold/30 to-transparent" />
-                  <div className="absolute top-0 right-0 h-px w-8 bg-gradient-to-l from-champagne-gold/30 to-transparent" />
-                </div>
-              </motion.div>
-              </Link>
-            </StaggerItem>
-          ))}
+                    {/* Expanded: Book Now link */}
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="pt-5 mt-5 border-t border-champagne-gold/10">
+                            <Link
+                              href={`/services?category=${service.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-2 font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold hover:text-champagne-gold/80 transition-colors duration-300"
+                            >
+                              View Full Details
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                              </svg>
+                            </Link>
+                            <Link
+                              href="/booking"
+                              onClick={(e) => e.stopPropagation()}
+                              className="ml-6 inline-flex items-center gap-2 font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold hover:text-champagne-gold/80 transition-colors duration-300"
+                            >
+                              Book Now
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                              </svg>
+                            </Link>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Corner accent */}
+                  <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden pointer-events-none">
+                    <div className="absolute top-0 right-0 w-px h-8 bg-gradient-to-b from-champagne-gold/30 to-transparent" />
+                    <div className="absolute top-0 right-0 h-px w-8 bg-gradient-to-l from-champagne-gold/30 to-transparent" />
+                  </div>
+                </motion.div>
+              </StaggerItem>
+            );
+          })}
         </StaggerContainer>
 
         {/* CTA */}
