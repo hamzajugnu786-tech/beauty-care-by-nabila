@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
@@ -27,6 +27,7 @@ const aspectMap = {
 
 export function GalleryPageContent() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const filteredItems = useMemo(
     () =>
@@ -35,6 +36,32 @@ export function GalleryPageContent() {
         : GALLERY_MASONRY_ITEMS.filter((item) => item.category === activeCategory),
     [activeCategory]
   );
+
+  const closeLightbox = useCallback(() => setSelectedIndex(null), []);
+  const goNext = useCallback(() => {
+    if (selectedIndex === null) return;
+    setSelectedIndex((selectedIndex + 1) % filteredItems.length);
+  }, [selectedIndex, filteredItems.length]);
+  const goPrev = useCallback(() => {
+    if (selectedIndex === null) return;
+    setSelectedIndex((selectedIndex - 1 + filteredItems.length) % filteredItems.length);
+  }, [selectedIndex, filteredItems.length]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowLeft") goPrev();
+    };
+    if (selectedIndex !== null) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKey);
+    }
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [selectedIndex, closeLightbox, goNext, goPrev]);
 
   return (
     <div className="min-h-screen flex flex-col bg-matte-black">
@@ -89,7 +116,7 @@ export function GalleryPageContent() {
                   transition={{ delay: index * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   className="mb-4 sm:mb-5 break-inside-avoid group"
                 >
-                  <div className="relative overflow-hidden rounded-sm bg-dark-card border border-champagne-gold/8 hover:border-champagne-gold/20 transition-all duration-700">
+                  <div className="relative overflow-hidden rounded-sm bg-dark-card border border-champagne-gold/8 hover:border-champagne-gold/20 transition-all duration-700 cursor-pointer" onClick={() => setSelectedIndex(index)}>
                     {/* Image with aspect ratio */}
                     <div className={`${aspectMap[item.height]} relative overflow-hidden`}>
                       <Image
@@ -129,6 +156,48 @@ export function GalleryPageContent() {
             )}
           </div>
         </section>
+
+        {/* Lightbox */}
+        <AnimatePresence>
+          {selectedIndex !== null && filteredItems[selectedIndex] && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+              onClick={closeLightbox}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="relative max-w-5xl w-full aspect-[4/3] bg-dark-card rounded-sm border border-champagne-gold/20 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Image
+                  src={filteredItems[selectedIndex].src}
+                  alt={filteredItems[selectedIndex].alt}
+                  fill
+                  className="object-contain"
+                  sizes="90vw"
+                />
+                {/* Close */}
+                <button onClick={closeLightbox} className="absolute top-4 right-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 transition-all duration-300 z-50" aria-label="Close">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                {/* Prev */}
+                <button onClick={(e) => { e.stopPropagation(); goPrev(); }} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-champagne-gold/20 bg-matte-black/70 backdrop-blur-sm flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold transition-all duration-300 z-50" aria-label="Previous">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                </button>
+                {/* Next */}
+                <button onClick={(e) => { e.stopPropagation(); goNext(); }} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-champagne-gold/20 bg-matte-black/70 backdrop-blur-sm flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold transition-all duration-300 z-50" aria-label="Next">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Stats Section */}
         <section className="relative py-20 sm:py-28 overflow-hidden">

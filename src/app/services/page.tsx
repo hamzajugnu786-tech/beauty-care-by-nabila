@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHero } from "@/components/shared/PageHero";
@@ -11,7 +12,7 @@ import { RevealOnScroll, StaggerContainer, StaggerItem } from "@/components/ui/R
 import { LuxuryButton } from "@/components/ui/LuxuryButton";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { generateServiceSchemas, PAGE_BREADCRUMBS } from "@/lib/structured-data";
-import { DETAILED_SERVICES, SERVICE_CATEGORIES } from "@/lib/constants";
+import { DETAILED_SERVICES, SERVICE_CATEGORIES, SERVICES } from "@/lib/constants";
 
 const serviceIcons: Record<string, React.ReactNode> = {
   crown: (
@@ -53,6 +54,9 @@ function ServiceCard({
   service: (typeof DETAILED_SERVICES)[number];
   onExpand: (id: string) => void;
 }) {
+  // Find the matching homepage service for background image
+  const homeService = SERVICES.find((s) => s.id === service.category);
+
   return (
     <motion.div
       layout
@@ -63,28 +67,67 @@ function ServiceCard({
       whileHover={{ y: -6 }}
       className="group relative bg-dark-card border border-champagne-gold/10 hover:border-champagne-gold/25 rounded-sm overflow-hidden transition-all duration-700"
     >
-      {/* Hover glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-champagne-gold/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-      {/* Popular badge */}
-      {service.popular && (
-        <div className="absolute top-0 right-0 z-20">
-          <div className="bg-champagne-gold text-matte-black font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.15em] px-4 py-1.5">
-            Popular
+      {/* Background image */}
+      {homeService?.image && (
+        <div className="relative h-40 overflow-hidden">
+          <Image
+            src={homeService.image}
+            alt={service.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-700"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/60 to-transparent" />
+          {/* Icon badge on image */}
+          <div className="absolute top-3 left-3 w-9 h-9 rounded-full border border-champagne-gold/30 bg-matte-black/60 backdrop-blur-sm flex items-center justify-center text-champagne-gold">
+            {serviceIcons[service.icon] || serviceIcons.sparkles}
           </div>
+          {/* Popular badge */}
+          {service.popular && (
+            <div className="absolute top-3 right-3 z-20">
+              <div className="bg-champagne-gold text-matte-black font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.15em] px-3 py-1 rounded-sm">
+                Popular
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      <div className="relative z-10 p-7 sm:p-9">
-        {/* Header: Icon + Category */}
-        <div className="flex items-start justify-between mb-5">
-          <div className="w-11 h-11 rounded-full border border-champagne-gold/20 flex items-center justify-center text-champagne-gold group-hover:border-champagne-gold/40 transition-colors duration-500">
-            {serviceIcons[service.icon] || serviceIcons.sparkles}
+      {/* Fallback if no image */}
+      {!homeService?.image && (
+        <>
+          {/* Hover glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-b from-champagne-gold/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          {/* Popular badge */}
+          {service.popular && (
+            <div className="absolute top-0 right-0 z-20">
+              <div className="bg-champagne-gold text-matte-black font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.15em] px-4 py-1.5">
+                Popular
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="relative z-10 p-6 sm:p-7">
+        {/* Header: Icon + Category (only if no bg image) */}
+        {!homeService?.image && (
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-11 h-11 rounded-full border border-champagne-gold/20 flex items-center justify-center text-champagne-gold group-hover:border-champagne-gold/40 transition-colors duration-500">
+              {serviceIcons[service.icon] || serviceIcons.sparkles}
+            </div>
+            <span className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-text-muted/50">
+              {service.category}
+            </span>
           </div>
-          <span className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-text-muted/50">
+        )}
+
+        {/* Category label (when has bg image) */}
+        {homeService?.image && (
+          <span className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-champagne-gold/50">
             {service.category}
           </span>
-        </div>
+        )}
 
         {/* Title */}
         <h3 className="font-[family-name:var(--font-playfair)] text-xl sm:text-[22px] font-medium text-text-primary group-hover:text-champagne-gold transition-colors duration-500 leading-tight">
@@ -121,7 +164,7 @@ function ServiceCard({
       </div>
 
       {/* Corner accent */}
-      <div className="absolute top-0 left-0 w-12 h-12 overflow-hidden">
+      <div className="absolute top-0 left-0 w-12 h-12 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-px h-6 bg-gradient-to-b from-champagne-gold/20 to-transparent" />
         <div className="absolute top-0 left-0 h-px w-6 bg-gradient-to-r from-champagne-gold/20 to-transparent" />
       </div>
@@ -145,7 +188,7 @@ function ServiceDetailModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-[60] bg-matte-black/90 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6"
+        className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6"
         onClick={onClose}
       >
         <motion.div
@@ -159,7 +202,7 @@ function ServiceDetailModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 z-20 w-10 h-10 rounded-full border border-champagne-gold/20 flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-500"
+            className="absolute top-5 right-5 z-50 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 transition-all duration-300"
             aria-label="Close details"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

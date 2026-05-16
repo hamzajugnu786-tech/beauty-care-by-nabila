@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import Image from "next/image";
-import { SERVICES } from "@/lib/constants";
+import Link from "next/link";
+import { SERVICES, DETAILED_SERVICES, SERVICE_CATEGORIES } from "@/lib/constants";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll, StaggerContainer, StaggerItem } from "@/components/ui/RevealOnScroll";
 import { LuxuryButton } from "@/components/ui/LuxuryButton";
@@ -43,7 +43,31 @@ const serviceIcons: Record<string, React.ReactElement> = {
 };
 
 export function ServicesSection() {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [lightboxService, setLightboxService] = useState<string | null>(null);
+
+  const closeLightbox = useCallback(() => setLightboxService(null), []);
+
+  // ESC key to close
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+    };
+    if (lightboxService) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKey);
+    }
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [lightboxService, closeLightbox]);
+
+  // Get detailed services for the selected category
+  const detailedServices = lightboxService
+    ? DETAILED_SERVICES.filter((s) => s.category === lightboxService)
+    : [];
+
+  const currentService = SERVICES.find((s) => s.id === lightboxService);
 
   return (
     <section className="section-gap section-padding relative overflow-hidden">
@@ -67,118 +91,67 @@ export function ServicesSection() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
           staggerDelay={0.1}
         >
-          {SERVICES.map((service) => {
-            const isExpanded = expandedId === service.id;
-            return (
-              <StaggerItem key={service.id}>
-                <motion.div
-                  layout
-                  whileHover={{ y: -4 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="group relative bg-dark-card border border-champagne-gold/10 hover:border-champagne-gold/25 rounded-sm overflow-hidden cursor-pointer transition-all duration-700"
-                  onClick={() => setExpandedId(isExpanded ? null : service.id)}
-                >
-                  {/* Service Background Image */}
-                  <div className="relative h-48 sm:h-56 overflow-hidden">
-                    <Image
-                      src={service.image}
-                      alt={service.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                    {/* Dark overlay for text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/60 to-transparent" />
-                    {/* Icon badge */}
-                    <div className="absolute top-4 left-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/60 backdrop-blur-sm flex items-center justify-center text-champagne-gold">
-                      {serviceIcons[service.icon] || serviceIcons.sparkles}
-                    </div>
+          {SERVICES.map((service) => (
+            <StaggerItem key={service.id}>
+              <motion.div
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative bg-dark-card border border-champagne-gold/10 hover:border-champagne-gold/25 rounded-sm overflow-hidden transition-all duration-700"
+              >
+                {/* Service Background Image */}
+                <div className="relative h-48 sm:h-56 overflow-hidden">
+                  <Image
+                    src={service.image}
+                    alt={service.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  {/* Dark overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/60 to-transparent" />
+                  {/* Icon badge */}
+                  <div className="absolute top-4 left-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/60 backdrop-blur-sm flex items-center justify-center text-champagne-gold">
+                    {serviceIcons[service.icon] || serviceIcons.sparkles}
                   </div>
+                </div>
 
-                  {/* Content */}
-                  <div className="relative z-10 p-6 sm:p-8">
-                    {/* Title */}
-                    <h3 className="font-[family-name:var(--font-playfair)] text-xl sm:text-2xl font-medium text-text-primary group-hover:text-champagne-gold transition-colors duration-500">
-                      {service.title}
-                    </h3>
+                {/* Content */}
+                <div className="relative z-10 p-6 sm:p-8">
+                  {/* Title */}
+                  <h3 className="font-[family-name:var(--font-playfair)] text-xl sm:text-2xl font-medium text-text-primary group-hover:text-champagne-gold transition-colors duration-500">
+                    {service.title}
+                  </h3>
 
-                    {/* Description */}
-                    <p className="mt-3 font-[family-name:var(--font-cormorant)] text-base text-text-muted leading-relaxed">
-                      {service.description}
-                    </p>
+                  {/* Description */}
+                  <p className="mt-3 font-[family-name:var(--font-cormorant)] text-base text-text-muted leading-relaxed">
+                    {service.description}
+                  </p>
 
-                    {/* Price & Arrow */}
-                    <div className="mt-6 flex items-center justify-between">
-                      <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60">
-                        {service.price}
-                      </span>
-                      <motion.div
-                        animate={{ rotate: isExpanded ? 90 : 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="w-8 h-8 flex items-center justify-center text-champagne-gold/40 group-hover:text-champagne-gold transition-colors duration-500"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                          />
-                        </svg>
-                      </motion.div>
-                    </div>
-
-                    {/* Expanded: Book Now link */}
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="pt-5 mt-5 border-t border-champagne-gold/10">
-                            <Link
-                              href={`/services?category=${service.id}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-2 font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold hover:text-champagne-gold/80 transition-colors duration-300"
-                            >
-                              View Full Details
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                              </svg>
-                            </Link>
-                            <Link
-                              href="/booking"
-                              onClick={(e) => e.stopPropagation()}
-                              className="ml-6 inline-flex items-center gap-2 font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold hover:text-champagne-gold/80 transition-colors duration-300"
-                            >
-                              Book Now
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                              </svg>
-                            </Link>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  {/* Price & Arrow */}
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60">
+                      {service.price}
+                    </span>
+                    <button
+                      onClick={() => setLightboxService(service.id)}
+                      className="w-8 h-8 flex items-center justify-center text-champagne-gold/40 group-hover:text-champagne-gold hover:bg-champagne-gold/10 rounded-full transition-all duration-500"
+                      aria-label={`View ${service.title} details`}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
+                      </svg>
+                    </button>
                   </div>
+                </div>
 
-                  {/* Corner accent */}
-                  <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden pointer-events-none">
-                    <div className="absolute top-0 right-0 w-px h-8 bg-gradient-to-b from-champagne-gold/30 to-transparent" />
-                    <div className="absolute top-0 right-0 h-px w-8 bg-gradient-to-l from-champagne-gold/30 to-transparent" />
-                  </div>
-                </motion.div>
-              </StaggerItem>
-            );
-          })}
+                {/* Corner accent */}
+                <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden pointer-events-none">
+                  <div className="absolute top-0 right-0 w-px h-8 bg-gradient-to-b from-champagne-gold/30 to-transparent" />
+                  <div className="absolute top-0 right-0 h-px w-8 bg-gradient-to-l from-champagne-gold/30 to-transparent" />
+                </div>
+              </motion.div>
+            </StaggerItem>
+          ))}
         </StaggerContainer>
 
         {/* CTA */}
@@ -188,6 +161,141 @@ export function ServicesSection() {
           </LuxuryButton>
         </RevealOnScroll>
       </div>
+
+      {/* Service Details Lightbox */}
+      <AnimatePresence>
+        {lightboxService && currentService && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto"
+            onClick={closeLightbox}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="relative max-w-4xl w-full bg-dark-card border border-champagne-gold/20 rounded-sm overflow-hidden my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header with image */}
+              <div className="relative h-56 sm:h-72 overflow-hidden">
+                <Image
+                  src={currentService.image}
+                  alt={currentService.title}
+                  fill
+                  className="object-cover"
+                  sizes="90vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/50 to-transparent" />
+                <div className="absolute bottom-6 left-8 right-16">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full border border-champagne-gold/30 bg-matte-black/60 flex items-center justify-center text-champagne-gold">
+                      {serviceIcons[currentService.icon] || serviceIcons.sparkles}
+                    </div>
+                    <span className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-champagne-gold/70">
+                      {currentService.id}
+                    </span>
+                  </div>
+                  <h2 className="font-[family-name:var(--font-playfair)] text-2xl sm:text-3xl font-medium text-text-primary">
+                    {currentService.title}
+                  </h2>
+                  <p className="mt-2 font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold">
+                    {currentService.price}
+                  </p>
+                </div>
+              </div>
+
+              {/* Close button */}
+              <button
+                onClick={closeLightbox}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 transition-all duration-300 z-50"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Description */}
+              <div className="p-6 sm:p-8">
+                <p className="font-[family-name:var(--font-cormorant)] text-lg text-text-muted leading-relaxed">
+                  {currentService.description}
+                </p>
+
+                {/* Detailed services in this category */}
+                {detailedServices.length > 0 && (
+                  <div className="mt-8 space-y-4">
+                    <h3 className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60 mb-4">
+                      Services in this category
+                    </h3>
+                    {detailedServices.map((ds) => (
+                      <div
+                        key={ds.id}
+                        className="bg-dark-surface/30 border border-champagne-gold/8 rounded-sm p-4 sm:p-5 hover:border-champagne-gold/20 transition-all duration-500"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-[family-name:var(--font-playfair)] text-base sm:text-lg font-medium text-text-primary">
+                                {ds.title}
+                              </h4>
+                              {ds.popular && (
+                                <span className="font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.15em] bg-champagne-gold/10 text-champagne-gold px-2 py-0.5 rounded-sm">
+                                  Popular
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-1.5 font-[family-name:var(--font-cormorant)] text-sm text-text-muted leading-relaxed line-clamp-2">
+                              {ds.description}
+                            </p>
+                            <div className="mt-2 flex items-center gap-4">
+                              <span className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.15em] text-champagne-gold/50">
+                                {ds.duration}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-[family-name:var(--font-playfair)] text-lg font-medium text-champagne-gold">
+                              {ds.price}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Features */}
+                        {ds.features && ds.features.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                            {ds.features.slice(0, 3).map((f, i) => (
+                              <span key={i} className="font-[family-name:var(--font-inter)] text-[9px] text-text-muted/60 flex items-center gap-1.5">
+                                <span className="w-1 h-1 rounded-full bg-champagne-gold/30" />
+                                {f}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Book Now button */}
+                <div className="mt-8 flex items-center gap-4">
+                  <Link href="/booking">
+                    <LuxuryButton size="md">Book Now</LuxuryButton>
+                  </Link>
+                  <Link
+                    href="/services"
+                    className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60 hover:text-champagne-gold transition-colors duration-300"
+                  >
+                    View All Services
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

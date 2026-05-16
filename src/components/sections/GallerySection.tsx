@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { GALLERY_IMAGES } from "@/lib/constants";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
@@ -9,19 +10,17 @@ import { LuxuryButton } from "@/components/ui/LuxuryButton";
 
 const CATEGORIES = ["all", "bridal", "hair", "makeup", "skincare", "nails", "spa"] as const;
 
-interface CloudinaryImage {
-  id: string;
+interface GalleryImage {
+  id: string | number;
   src: string;
   alt: string;
   category: string;
-  height: string;
-  featured: boolean;
 }
 
 export function GallerySection() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [cloudinaryImages, setCloudinaryImages] = useState<CloudinaryImage[]>([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [cloudinaryImages, setCloudinaryImages] = useState<GalleryImage[]>([]);
 
   useEffect(() => {
     fetch("/api/gallery")
@@ -34,8 +33,16 @@ export function GallerySection() {
       .catch(() => {});
   }, []);
 
-  // Use Cloudinary images if available, otherwise fall back to constants
-  const allImages = cloudinaryImages.length > 0 ? cloudinaryImages : GALLERY_IMAGES;
+  // Normalize all images to same format
+  const allImages: GalleryImage[] = useMemo(() => {
+    if (cloudinaryImages.length > 0) return cloudinaryImages;
+    return GALLERY_IMAGES.map((img) => ({
+      id: img.id,
+      src: img.src,
+      alt: img.alt,
+      category: img.category,
+    }));
+  }, [cloudinaryImages]);
 
   const filteredImages = useMemo(
     () =>
@@ -44,6 +51,33 @@ export function GallerySection() {
         : allImages.filter((img) => img.category === activeCategory),
     [activeCategory, allImages]
   );
+
+  const closeLightbox = useCallback(() => setSelectedImageIndex(null), []);
+  const goNext = useCallback(() => {
+    if (selectedImageIndex === null) return;
+    setSelectedImageIndex((selectedImageIndex + 1) % filteredImages.length);
+  }, [selectedImageIndex, filteredImages.length]);
+  const goPrev = useCallback(() => {
+    if (selectedImageIndex === null) return;
+    setSelectedImageIndex((selectedImageIndex - 1 + filteredImages.length) % filteredImages.length);
+  }, [selectedImageIndex, filteredImages.length]);
+
+  // ESC key to close
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowLeft") goPrev();
+    };
+    if (selectedImageIndex !== null) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKey);
+    }
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [selectedImageIndex, closeLightbox, goNext, goPrev]);
 
   return (
     <section className="section-gap section-padding relative overflow-hidden">
@@ -79,7 +113,7 @@ export function GallerySection() {
           </div>
         </RevealOnScroll>
 
-        {/* Gallery Grid - Using key on grid container for clean re-render on category change */}
+        {/* Gallery Grid */}
         <motion.div
           key={activeCategory}
           initial={{ opacity: 0 }}
@@ -94,39 +128,30 @@ export function GallerySection() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05, duration: 0.4 }}
               className="group relative aspect-square overflow-hidden rounded-sm cursor-pointer bg-dark-card border border-champagne-gold/5 hover:border-champagne-gold/20 transition-all duration-700"
-              onClick={() => setSelectedImage(typeof image.id === 'string' ? image.id : String(image.id))}
+              onClick={() => setSelectedImageIndex(index)}
             >
-              {/* Real image or placeholder */}
-              {("src" in image && (image as CloudinaryImage).src) ? (
-                <img
-                  src={(image as CloudinaryImage).src}
+              {image.src ? (
+                <Image
+                  src={image.src}
                   alt={image.alt}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
               ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-dark-card via-dark-elevated/50 to-dark-card">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg
-                    className="w-8 h-8 text-champagne-gold/20 group-hover:text-champagne-gold/40 transition-colors duration-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v15a1.5 1.5 0 001.5 1.5z"
-                    />
-                  </svg>
+                <div className="absolute inset-0 bg-gradient-to-br from-dark-card via-dark-elevated/50 to-dark-card">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-8 h-8 text-champagne-gold/20 group-hover:text-champagne-gold/40 transition-colors duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v15a1.5 1.5 0 001.5 1.5z" />
+                    </svg>
+                  </div>
                 </div>
-              </div>
               )}
 
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              {/* Category label */}
+              {/* Category label on hover */}
               <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                 <p className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-champagne-gold/70">
                   {image.category}
@@ -139,7 +164,7 @@ export function GallerySection() {
           ))}
         </motion.div>
 
-        {/* Empty state when no images match */}
+        {/* Empty state */}
         {filteredImages.length === 0 && (
           <div className="text-center py-16">
             <p className="font-[family-name:var(--font-cormorant)] text-lg text-text-muted">
@@ -150,53 +175,69 @@ export function GallerySection() {
 
         {/* Lightbox */}
         <AnimatePresence>
-          {selectedImage !== null && (
+          {selectedImageIndex !== null && filteredImages[selectedImageIndex] && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4"
-              onClick={() => setSelectedImage(null)}
+              onClick={closeLightbox}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative max-w-4xl w-full aspect-[4/3] bg-dark-card rounded-sm border border-champagne-gold/20 overflow-hidden"
+                className="relative max-w-5xl w-full aspect-[4/3] bg-dark-card rounded-sm border border-champagne-gold/20 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Real image or placeholder in lightbox */}
-                {(() => {
-                  const img = allImages.find((i) => (typeof i.id === 'string' ? i.id : String(i.id)) === selectedImage);
-                  const cloudImg = img as CloudinaryImage | undefined;
-                  return cloudImg?.src ? (
-                    <img src={cloudImg.src} alt={img?.alt || "Gallery image"} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <p className="font-[family-name:var(--font-cormorant)] text-xl text-champagne-gold/40 italic">
-                        {img?.alt}
-                      </p>
-                    </div>
-                  );
-                })()}
+                {/* Image in lightbox */}
+                {filteredImages[selectedImageIndex]?.src ? (
+                  <Image
+                    src={filteredImages[selectedImageIndex].src}
+                    alt={filteredImages[selectedImageIndex].alt}
+                    fill
+                    className="object-contain"
+                    sizes="90vw"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <p className="font-[family-name:var(--font-cormorant)] text-xl text-champagne-gold/40 italic">
+                      {filteredImages[selectedImageIndex]?.alt}
+                    </p>
+                  </div>
+                )}
+
+                {/* Close button - always visible and clickable */}
                 <button
-                  onClick={() => setSelectedImage(null)}
-                  className="absolute -top-12 right-0 sm:top-4 sm:right-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/80 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 hover:bg-matte-black transition-all duration-300 z-10"
+                  onClick={closeLightbox}
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 hover:bg-matte-black transition-all duration-300 z-50"
                   aria-label="Close lightbox"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+
+                {/* Previous button */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-champagne-gold/20 bg-matte-black/70 backdrop-blur-sm flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-300 z-50"
+                  aria-label="Previous image"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+
+                {/* Next button */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); goNext(); }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-champagne-gold/20 bg-matte-black/70 backdrop-blur-sm flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-300 z-50"
+                  aria-label="Next image"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </button>
               </motion.div>
