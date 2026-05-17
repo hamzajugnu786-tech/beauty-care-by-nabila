@@ -14,18 +14,6 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { generateDefaultGallerySchema, PAGE_BREADCRUMBS } from "@/lib/structured-data";
 import { GALLERY_MASONRY_ITEMS, GALLERY_CATEGORIES, BRAND } from "@/lib/constants";
 
-const heightMap = {
-  tall: "row-span-2",
-  medium: "row-span-1",
-  short: "row-span-1",
-};
-
-const aspectMap = {
-  tall: "aspect-[3/4]",
-  medium: "aspect-[4/3]",
-  short: "aspect-square",
-};
-
 interface LightboxImage {
   src: string;
   alt: string;
@@ -57,7 +45,7 @@ function GalleryPageLightbox({
         className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-8"
         onClick={onClose}
       >
-        {/* Close button - FIXED position, always visible above everything */}
+        {/* Close button */}
         <button
           onClick={onClose}
           className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[10001] w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 hover:bg-matte-black transition-all duration-300"
@@ -123,11 +111,12 @@ function GalleryPageLightbox({
 export function GalleryPageContent() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [imgErrors, setImgErrors] = useState<Set<number>>(new Set());
 
   const filteredItems = useMemo(
     () =>
       activeCategory === "all"
-        ? GALLERY_MASONRY_ITEMS
+        ? [...GALLERY_MASONRY_ITEMS]
         : GALLERY_MASONRY_ITEMS.filter((item) => item.category === activeCategory),
     [activeCategory]
   );
@@ -193,7 +182,7 @@ export function GalleryPageContent() {
           </div>
         </section>
 
-        {/* Masonry Grid */}
+        {/* Gallery Grid - using CSS Grid for reliable rendering */}
         <section className="section-padding py-16 sm:py-20">
           <div className="max-w-[1440px] mx-auto">
             <motion.div
@@ -201,41 +190,60 @@ export function GalleryPageContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-5"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"
             >
-              {filteredItems.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="mb-4 sm:mb-5 break-inside-avoid group"
-                >
-                  <div className="relative overflow-hidden rounded-sm bg-dark-card border border-champagne-gold/8 hover:border-champagne-gold/20 transition-all duration-700 cursor-pointer" onClick={() => setSelectedIndex(index)}>
-                    {/* Image with aspect ratio */}
-                    <div className={`${aspectMap[item.height]} relative overflow-hidden`}>
-                      <Image
-                        src={item.src}
-                        alt={item.alt}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      />
+              {filteredItems.map((item, index) => {
+                const isTall = item.height === "tall";
+                const hasError = imgErrors.has(item.id);
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className={`group ${isTall ? "sm:row-span-2" : ""}`}
+                  >
+                    <div
+                      className="relative overflow-hidden rounded-sm bg-dark-card border border-champagne-gold/8 hover:border-champagne-gold/20 transition-all duration-700 cursor-pointer"
+                      onClick={() => setSelectedIndex(index)}
+                    >
+                      {/* Image container with explicit aspect ratio */}
+                      <div className={`relative overflow-hidden ${isTall ? "aspect-[3/4]" : item.height === "medium" ? "aspect-[4/3]" : "aspect-square"}`}>
+                        {!hasError ? (
+                          <Image
+                            src={item.src}
+                            alt={item.alt}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-700"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                            onError={() => {
+                              setImgErrors(prev => new Set(prev).add(item.id));
+                            }}
+                          />
+                        ) : (
+                          /* Fallback when image fails */
+                          <div className="absolute inset-0 bg-gradient-to-br from-dark-card via-dark-elevated/50 to-dark-card flex items-center justify-center">
+                            <svg className="w-8 h-8 text-champagne-gold/20 group-hover:text-champagne-gold/40 transition-colors duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v15a1.5 1.5 0 001.5 1.5z" />
+                            </svg>
+                          </div>
+                        )}
 
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-matte-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                        <p className="font-[family-name:var(--font-cormorant)] text-sm text-text-primary">
-                          {item.alt}
-                        </p>
-                        <p className="mt-1 font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.2em] text-champagne-gold/60">
-                          {item.category}
-                        </p>
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-matte-black/80 via-matte-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                          <p className="font-[family-name:var(--font-cormorant)] text-sm text-text-primary">
+                            {item.alt}
+                          </p>
+                          <p className="mt-1 font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.2em] text-champagne-gold/60">
+                            {item.category}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </motion.div>
 
             {filteredItems.length === 0 && (

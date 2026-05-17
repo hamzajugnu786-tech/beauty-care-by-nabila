@@ -42,8 +42,8 @@ const nextConfig: NextConfig = {
 
     // Allow animated images (AVIF, WebP, GIF)
     dangerouslyAllowSVG: true,
-    contentDispositionType: "attachment",
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    contentDispositionType: "inline",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none';",
 
     // Remote image patterns for Sanity CMS
     remotePatterns: [
