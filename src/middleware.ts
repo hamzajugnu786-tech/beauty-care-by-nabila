@@ -411,9 +411,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check for JWT token
+  // Use the same fallback secret as authOptions in lib/auth.ts
+  // to ensure token signing and validation use the same secret
+  const nextAuthSecret = process.env.NEXTAUTH_SECRET || "beauty-care-nabila-lahore-secret-2026";
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: nextAuthSecret,
   });
 
   // No token -> redirect to login
