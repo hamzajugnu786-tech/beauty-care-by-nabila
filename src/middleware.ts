@@ -190,13 +190,18 @@ function buildCSP(): string {
     ? `frame-ancestors 'self' 'unsafe-inline' https://*.space-z.ai https://*.space.chatglm.site https://*.chatglm.site http://localhost:*`
     : `frame-ancestors 'self' https://*.space-z.ai https://*.space.chatglm.site https://*.chatglm.site`;
 
+  // Allow NextAuth to work on Vercel by including the deployed domain in connect-src
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "";
+
   const directives: string[] = [
     `default-src 'self'`,
     `script-src 'self' 'unsafe-inline' 'unsafe-eval'${isDev ? " localhost:*" : ""}`,
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' data: https: blob:`,
     `font-src 'self' data: https://fonts.gstatic.com`,
-    `connect-src 'self' https:${isDev ? " ws://localhost:* http://localhost:*" : ""}`,
+    `connect-src 'self' https:${appUrl ? ` ${appUrl}` : ""}${isDev ? " ws://localhost:* http://localhost:*" : ""}`,
     `media-src 'self'`,
     `frame-src 'none'`,
     `object-src 'none'`,

@@ -24,6 +24,8 @@ const FALLBACK_ADMINS = [
   { email: "admin@nabilalahore.com", password: "admin1234", name: "Nabila Admin", role: "super-admin" },
 ];
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -120,4 +122,33 @@ export const authOptions: NextAuthOptions = {
     maxAge: 24 * 60 * 60, // 24 hours
   },
   secret: process.env.NEXTAUTH_SECRET || "beauty-care-nabila-lahore-secret-2026",
+  cookies: {
+    sessionToken: {
+      name: `${isProduction ? "__Host-" : ""}next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: isProduction ? "lax" : "lax",
+        path: isProduction ? "/" : "/",
+        secure: isProduction,
+      },
+    },
+    callbackUrl: {
+      name: `${isProduction ? "__Secure-" : ""}next-auth.callback-url`,
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
+    },
+    csrfToken: {
+      name: `${isProduction ? "__Host-" : ""}next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
+    },
+  },
+  debug: !isProduction,
 };

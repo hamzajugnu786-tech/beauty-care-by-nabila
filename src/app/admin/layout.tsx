@@ -81,16 +81,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         },
         getPermissionsForRole(role)
       );
-    } else if (status === "unauthenticated") {
+    } else if (status === "unauthenticated" && mounted) {
+      // Only redirect after mounting to avoid flash from initial session loading
       clearAuth();
       setRedirecting(true);
-      // Small delay to show the redirect message instead of blank page
       const timer = setTimeout(() => {
         router.push("/admin/login");
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [session, status, setAuth, clearAuth, router]);
+  }, [session, status, mounted, setAuth, clearAuth, router]);
 
   // Show loading while mounting or session is loading
   if (!mounted || status === "loading") {
