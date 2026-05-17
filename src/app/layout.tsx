@@ -130,8 +130,8 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo.svg",
-    apple: "/logo.svg",
+    icon: "/favicon.png",
+    apple: "/favicon.png",
   },
   category: "beauty",
   classification: "Beauty & Wellness",

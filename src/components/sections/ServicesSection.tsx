@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { SERVICES, DETAILED_SERVICES, SERVICE_CATEGORIES } from "@/lib/constants";
+import { SERVICES, DETAILED_SERVICES } from "@/lib/constants";
 import { SectionHeading, GoldDivider } from "@/components/ui/LuxuryElements";
 import { RevealOnScroll, StaggerContainer, StaggerItem } from "@/components/ui/RevealOnScroll";
 import { LuxuryButton } from "@/components/ui/LuxuryButton";
@@ -42,10 +43,167 @@ const serviceIcons: Record<string, React.ReactElement> = {
   ),
 };
 
+function ServiceLightbox({
+  service,
+  onClose,
+}: {
+  service: (typeof SERVICES)[number] | null;
+  onClose: () => void;
+}) {
+  if (!service) return null;
+
+  const detailedServices = DETAILED_SERVICES.filter((s) => s.category === service.id);
+
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 40, scale: 0.95 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="relative max-w-2xl w-full max-h-[85vh] overflow-y-auto bg-dark-card border border-champagne-gold/15 rounded-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button - OUTSIDE the scrollable area, always visible */}
+          <button
+            onClick={onClose}
+            className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[10001] w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 transition-all duration-300"
+            aria-label="Close details"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Header section */}
+          <div className="relative p-8 sm:p-10 pb-0">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full border border-champagne-gold/25 flex items-center justify-center text-champagne-gold flex-shrink-0">
+                {serviceIcons[service.icon] || serviceIcons.sparkles}
+              </div>
+              <div>
+                <p className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-champagne-gold/60 mb-1">
+                  {service.id}
+                </p>
+                <h3 className="font-[family-name:var(--font-playfair)] text-2xl sm:text-3xl font-medium text-text-primary">
+                  {service.title}
+                </h3>
+              </div>
+            </div>
+            <p className="font-[family-name:var(--font-cormorant)] text-lg text-text-muted leading-relaxed">
+              {service.description}
+            </p>
+          </div>
+
+          <div className="p-8 sm:p-10">
+            {/* Price Range */}
+            <div className="flex items-center gap-8 mb-8 pb-8 border-b border-champagne-gold/10">
+              <div>
+                <p className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-text-muted/50 mb-1">
+                  Starting From
+                </p>
+                <p className="font-[family-name:var(--font-playfair)] text-2xl font-medium text-champagne-gold">
+                  {service.price}
+                </p>
+              </div>
+            </div>
+
+            {/* Services in this category */}
+            {detailedServices.length > 0 && (
+              <div className="mb-8">
+                <h4 className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.25em] text-champagne-gold/70 mb-5">
+                  Services in This Category
+                </h4>
+                <div className="space-y-4">
+                  {detailedServices.map((ds, i) => (
+                    <motion.div
+                      key={ds.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05, duration: 0.4 }}
+                      className="bg-dark-surface/30 border border-champagne-gold/8 rounded-sm p-4 sm:p-5 hover:border-champagne-gold/20 transition-all duration-500"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h5 className="font-[family-name:var(--font-playfair)] text-base sm:text-lg font-medium text-text-primary">
+                              {ds.title}
+                            </h5>
+                            {ds.popular && (
+                              <span className="font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.15em] bg-champagne-gold/10 text-champagne-gold px-2 py-0.5 rounded-sm">
+                                Popular
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-1.5 font-[family-name:var(--font-cormorant)] text-sm text-text-muted leading-relaxed line-clamp-2">
+                            {ds.description}
+                          </p>
+                          <div className="mt-2 flex items-center gap-4">
+                            <span className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.15em] text-champagne-gold/50">
+                              {ds.duration}
+                            </span>
+                          </div>
+                          {/* Features preview */}
+                          {ds.features && ds.features.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                              {ds.features.slice(0, 3).map((f, fi) => (
+                                <span key={fi} className="font-[family-name:var(--font-inter)] text-[9px] text-text-muted/60 flex items-center gap-1.5">
+                                  <span className="w-1 h-1 rounded-full bg-champagne-gold/30" />
+                                  {f}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="font-[family-name:var(--font-playfair)] text-lg font-medium text-champagne-gold">
+                            {ds.price}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CTA */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+              <Link href="/booking">
+                <LuxuryButton size="md">Book Now</LuxuryButton>
+              </Link>
+              <a
+                href="https://wa.me/923001234567?text=Hi, I'm interested in your services"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60 hover:text-champagne-gold transition-colors duration-500 flex items-center gap-2"
+              >
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                WhatsApp Inquiry
+              </a>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>,
+    document.body
+  );
+}
+
 export function ServicesSection() {
   const [lightboxService, setLightboxService] = useState<string | null>(null);
 
   const closeLightbox = useCallback(() => setLightboxService(null), []);
+
+  const currentService = SERVICES.find((s) => s.id === lightboxService) ?? null;
 
   // ESC key to close
   useEffect(() => {
@@ -61,13 +219,6 @@ export function ServicesSection() {
       window.removeEventListener("keydown", handleKey);
     };
   }, [lightboxService, closeLightbox]);
-
-  // Get detailed services for the selected category
-  const detailedServices = lightboxService
-    ? DETAILED_SERVICES.filter((s) => s.category === lightboxService)
-    : [];
-
-  const currentService = SERVICES.find((s) => s.id === lightboxService);
 
   return (
     <section className="section-gap section-padding relative overflow-hidden">
@@ -162,140 +313,8 @@ export function ServicesSection() {
         </RevealOnScroll>
       </div>
 
-      {/* Service Details Lightbox */}
-      <AnimatePresence>
-        {lightboxService && currentService && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto"
-            onClick={closeLightbox}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="relative max-w-4xl w-full bg-dark-card border border-champagne-gold/20 rounded-sm overflow-hidden my-8"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header with image */}
-              <div className="relative h-56 sm:h-72 overflow-hidden">
-                <Image
-                  src={currentService.image}
-                  alt={currentService.title}
-                  fill
-                  className="object-cover"
-                  sizes="90vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/50 to-transparent" />
-                <div className="absolute bottom-6 left-8 right-16">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-full border border-champagne-gold/30 bg-matte-black/60 flex items-center justify-center text-champagne-gold">
-                      {serviceIcons[currentService.icon] || serviceIcons.sparkles}
-                    </div>
-                    <span className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.2em] text-champagne-gold/70">
-                      {currentService.id}
-                    </span>
-                  </div>
-                  <h2 className="font-[family-name:var(--font-playfair)] text-2xl sm:text-3xl font-medium text-text-primary">
-                    {currentService.title}
-                  </h2>
-                  <p className="mt-2 font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold">
-                    {currentService.price}
-                  </p>
-                </div>
-              </div>
-
-              {/* Close button */}
-              <button
-                onClick={closeLightbox}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 transition-all duration-300 z-50"
-                aria-label="Close"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
-              {/* Description */}
-              <div className="p-6 sm:p-8">
-                <p className="font-[family-name:var(--font-cormorant)] text-lg text-text-muted leading-relaxed">
-                  {currentService.description}
-                </p>
-
-                {/* Detailed services in this category */}
-                {detailedServices.length > 0 && (
-                  <div className="mt-8 space-y-4">
-                    <h3 className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60 mb-4">
-                      Services in this category
-                    </h3>
-                    {detailedServices.map((ds) => (
-                      <div
-                        key={ds.id}
-                        className="bg-dark-surface/30 border border-champagne-gold/8 rounded-sm p-4 sm:p-5 hover:border-champagne-gold/20 transition-all duration-500"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-[family-name:var(--font-playfair)] text-base sm:text-lg font-medium text-text-primary">
-                                {ds.title}
-                              </h4>
-                              {ds.popular && (
-                                <span className="font-[family-name:var(--font-inter)] text-[8px] uppercase tracking-[0.15em] bg-champagne-gold/10 text-champagne-gold px-2 py-0.5 rounded-sm">
-                                  Popular
-                                </span>
-                              )}
-                            </div>
-                            <p className="mt-1.5 font-[family-name:var(--font-cormorant)] text-sm text-text-muted leading-relaxed line-clamp-2">
-                              {ds.description}
-                            </p>
-                            <div className="mt-2 flex items-center gap-4">
-                              <span className="font-[family-name:var(--font-inter)] text-[9px] uppercase tracking-[0.15em] text-champagne-gold/50">
-                                {ds.duration}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            <p className="font-[family-name:var(--font-playfair)] text-lg font-medium text-champagne-gold">
-                              {ds.price}
-                            </p>
-                          </div>
-                        </div>
-                        {/* Features */}
-                        {ds.features && ds.features.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
-                            {ds.features.slice(0, 3).map((f, i) => (
-                              <span key={i} className="font-[family-name:var(--font-inter)] text-[9px] text-text-muted/60 flex items-center gap-1.5">
-                                <span className="w-1 h-1 rounded-full bg-champagne-gold/30" />
-                                {f}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Book Now button */}
-                <div className="mt-8 flex items-center gap-4">
-                  <Link href="/booking">
-                    <LuxuryButton size="md">Book Now</LuxuryButton>
-                  </Link>
-                  <Link
-                    href="/services"
-                    className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/60 hover:text-champagne-gold transition-colors duration-300"
-                  >
-                    View All Services
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Service Details Lightbox - rendered via Portal */}
+      <ServiceLightbox service={currentService} onClose={closeLightbox} />
     </section>
   );
 }

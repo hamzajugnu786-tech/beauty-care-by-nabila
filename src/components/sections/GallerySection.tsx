@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { GALLERY_IMAGES } from "@/lib/constants";
@@ -15,6 +16,102 @@ interface GalleryImage {
   src: string;
   alt: string;
   category: string;
+}
+
+function GalleryLightbox({
+  images,
+  selectedIndex,
+  onClose,
+  onPrev,
+  onNext,
+}: {
+  images: GalleryImage[];
+  selectedIndex: number;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const image = images[selectedIndex];
+  if (!image) return null;
+
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-8"
+        onClick={onClose}
+      >
+        {/* Close button - FIXED position, always visible above everything */}
+        <button
+          onClick={onClose}
+          className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[10001] w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 hover:bg-matte-black transition-all duration-300"
+          aria-label="Close lightbox"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Image container */}
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="relative max-w-4xl w-full max-h-[80vh] bg-dark-card rounded-sm border border-champagne-gold/20 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="relative w-full h-[80vh] max-h-[80vh]">
+            {image.src ? (
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                className="object-contain"
+                sizes="90vw"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="font-[family-name:var(--font-cormorant)] text-xl text-champagne-gold/40 italic">
+                  {image.alt}
+                </p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Previous button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onPrev(); }}
+          className="fixed left-4 top-1/2 -translate-y-1/2 z-[10001] w-10 h-10 rounded-full border border-champagne-gold/20 bg-matte-black/70 backdrop-blur-sm flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-300"
+          aria-label="Previous image"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        {/* Next button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onNext(); }}
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-[10001] w-10 h-10 rounded-full border border-champagne-gold/20 bg-matte-black/70 backdrop-blur-sm flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-300"
+          aria-label="Next image"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+
+        {/* Image counter */}
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[10001] font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.2em] text-champagne-gold/40">
+          {selectedIndex + 1} / {images.length}
+        </div>
+      </motion.div>
+    </AnimatePresence>,
+    document.body
+  );
 }
 
 export function GallerySection() {
@@ -80,7 +177,7 @@ export function GallerySection() {
   }, [selectedImageIndex, closeLightbox, goNext, goPrev]);
 
   return (
-    <section className="section-gap section-padding relative overflow-hidden">
+    <section className="section-gap section-padding relative">
       <div className="absolute inset-0 bg-dark-surface/30" />
 
       <div className="relative z-10 max-w-[1440px] mx-auto">
@@ -173,78 +270,6 @@ export function GallerySection() {
           </div>
         )}
 
-        {/* Lightbox */}
-        <AnimatePresence>
-          {selectedImageIndex !== null && filteredImages[selectedImageIndex] && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9999] bg-matte-black/95 backdrop-blur-xl flex items-center justify-center p-4"
-              onClick={closeLightbox}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative max-w-5xl w-full aspect-[4/3] bg-dark-card rounded-sm border border-champagne-gold/20 overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Image in lightbox */}
-                {filteredImages[selectedImageIndex]?.src ? (
-                  <Image
-                    src={filteredImages[selectedImageIndex].src}
-                    alt={filteredImages[selectedImageIndex].alt}
-                    fill
-                    className="object-contain"
-                    sizes="90vw"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <p className="font-[family-name:var(--font-cormorant)] text-xl text-champagne-gold/40 italic">
-                      {filteredImages[selectedImageIndex]?.alt}
-                    </p>
-                  </div>
-                )}
-
-                {/* Close button - always visible and clickable */}
-                <button
-                  onClick={closeLightbox}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full border border-champagne-gold/30 bg-matte-black/90 backdrop-blur-sm flex items-center justify-center text-champagne-gold/80 hover:text-champagne-gold hover:border-champagne-gold/60 hover:bg-matte-black transition-all duration-300 z-50"
-                  aria-label="Close lightbox"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-
-                {/* Previous button */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-champagne-gold/20 bg-matte-black/70 backdrop-blur-sm flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-300 z-50"
-                  aria-label="Previous image"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                  </svg>
-                </button>
-
-                {/* Next button */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); goNext(); }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-champagne-gold/20 bg-matte-black/70 backdrop-blur-sm flex items-center justify-center text-champagne-gold/60 hover:text-champagne-gold hover:border-champagne-gold/40 transition-all duration-300 z-50"
-                  aria-label="Next image"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Book Appointment CTA */}
         <RevealOnScroll className="mt-14 text-center">
           <LuxuryButton href="/booking" size="lg">Book Appointment</LuxuryButton>
@@ -266,6 +291,17 @@ export function GallerySection() {
           </a>
         </RevealOnScroll>
       </div>
+
+      {/* Lightbox - rendered via Portal to document.body */}
+      {selectedImageIndex !== null && (
+        <GalleryLightbox
+          images={filteredImages}
+          selectedIndex={selectedImageIndex}
+          onClose={closeLightbox}
+          onPrev={goPrev}
+          onNext={goNext}
+        />
+      )}
     </section>
   );
 }
