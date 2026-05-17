@@ -39,6 +39,7 @@ import type {
   ServiceBreakdown,
 } from "@/lib/types/admin";
 import { BOOKING_STATUS_CONFIG } from "@/lib/types/admin";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // ─── Mock Data (replace with API calls in production) ───
 const mockStats: DashboardStats = {
@@ -197,6 +198,7 @@ export default function AdminDashboard() {
               </span>
             </div>
           </div>
+          <ErrorBoundary fallback={<div className="h-72 flex items-center justify-center text-text-muted text-sm">Chart unavailable</div>}>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={revenueData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
@@ -227,6 +229,7 @@ export default function AdminDashboard() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
+          </ErrorBoundary>
         </div>
 
         {/* Service Breakdown */}
@@ -235,6 +238,7 @@ export default function AdminDashboard() {
             <h3 className="text-sm font-medium text-text-primary">Service Breakdown</h3>
             <p className="text-xs text-text-muted mt-0.5">Revenue by category</p>
           </div>
+          <ErrorBoundary fallback={<div className="h-48 flex items-center justify-center text-text-muted text-sm">Chart unavailable</div>}>
           <div className="h-48 mb-4">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -267,6 +271,7 @@ export default function AdminDashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+          </ErrorBoundary>
           <div className="space-y-2">
             {serviceBreakdown.map((svc, i) => (
               <div key={svc.category} className="flex items-center justify-between text-xs">
@@ -340,6 +345,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Bookings by Day Chart */}
+          <ErrorBoundary fallback={<div className="h-36 flex items-center justify-center text-text-muted text-sm">Chart unavailable</div>}>
           <div className="h-36">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -370,6 +376,7 @@ export default function AdminDashboard() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+          </ErrorBoundary>
         </div>
       </motion.div>
     </motion.div>

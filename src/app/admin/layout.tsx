@@ -27,6 +27,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { signOut } from "next-auth/react";
 import { BRAND } from "@/lib/constants";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const iconMap: Record<string, any> = {
   LayoutDashboard,
@@ -60,6 +61,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const [mounted, setMounted] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -67,6 +69,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
+      setRedirecting(false);
       const role = (session.user as any).role as AdminRole || "super-admin";
       setAuth(
         {
@@ -80,16 +83,32 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       );
     } else if (status === "unauthenticated") {
       clearAuth();
-      router.push("/admin/login");
+      setRedirecting(true);
+      // Small delay to show the redirect message instead of blank page
+      const timer = setTimeout(() => {
+        router.push("/admin/login");
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [session, status, setAuth, clearAuth, router]);
 
+  // Show loading while mounting or session is loading
   if (!mounted || status === "loading") {
     return <AdminLoadingSkeleton />;
   }
 
-  if (status !== "authenticated") {
-    return null;
+  // Show redirect message instead of blank page when unauthenticated
+  if (status !== "authenticated" || redirecting) {
+    return (
+      <div className="min-h-screen bg-matte-black flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-champagne-gold/10 border border-champagne-gold/20 flex items-center justify-center animate-pulse">
+            <Crown className="w-6 h-6 text-champagne-gold" />
+          </div>
+          <p className="text-text-muted text-sm">Redirecting to login...</p>
+        </div>
+      </div>
+    );
   }
 
   const role = user?.role || "super-admin";
@@ -317,9 +336,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* Page Content with Error Boundary */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-4 md:p-6 lg:p-8">{children}</div>
+          <div className="p-4 md:p-6 lg:p-8">
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </div>
         </main>
       </div>
     </div>
