@@ -38,7 +38,7 @@ let lastCleanup = Date.now();
 const MIDDLEWARE_RATE_LIMITS: Record<string, RateLimitConfig> = {
   "api-general": { windowMs: 60_000, maxRequests: 30, blockDurationMs: 120_000 },
   "api-booking": { windowMs: 60_000, maxRequests: 5, blockDurationMs: 300_000 },
-  "api-auth": { windowMs: 900_000, maxRequests: 5, blockDurationMs: 900_000 },
+  "api-auth": { windowMs: 60_000, maxRequests: 20, blockDurationMs: 120_000 },
   "api-contact": { windowMs: 300_000, maxRequests: 3, blockDurationMs: 900_000 },
   "api-admin": { windowMs: 60_000, maxRequests: 60, blockDurationMs: 60_000 },
 };
