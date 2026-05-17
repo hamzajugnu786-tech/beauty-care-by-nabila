@@ -49,14 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  // Login page should NOT have admin layout (sidebar, auth checks, etc.)
-  // Without this check, the auth gate below creates an infinite redirect loop
-  // because the login page is inside /admin/ directory
-  const isLoginPage = pathname === "/admin/login";
-
-  if (isLoginPage) {
-    return <>{children}</>;
-  }
+  // ALL hooks must be called before any early return (Rules of Hooks)
   const {
     user,
     setAuth,
@@ -101,6 +94,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       return () => clearTimeout(timer);
     }
   }, [session, status, mounted, setAuth, clearAuth, router]);
+
+  // Login page should NOT have admin layout (sidebar, auth checks, etc.)
+  // Without this check, the auth gate below creates an infinite redirect loop
+  // because the login page is inside /admin/ directory
+  const isLoginPage = pathname === "/admin/login";
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   // Show loading while mounting or session is loading
   if (!mounted || status === "loading") {
