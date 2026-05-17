@@ -1,16 +1,31 @@
 "use client";
 
-// Force dynamic rendering
-export const dynamic = "force-dynamic";
-
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
+
+// Wrapper with Suspense boundary for useSearchParams()
 export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-matte-black flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-champagne-gold/20 border-t-champagne-gold rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <AdminLoginForm />
+    </Suspense>
+  );
+}
+
+function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/admin";
@@ -21,7 +36,6 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Only show demo login in development mode
   const isDev = process.env.NODE_ENV === "development";
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +63,6 @@ export default function AdminLoginPage() {
     }
   };
 
-  // Demo quick-login buttons — DEVELOPMENT ONLY
   const handleDemoLogin = (role: string) => {
     if (!isDev) return;
     const demoEmails: Record<string, string> = {

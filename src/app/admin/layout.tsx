@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useAdminStore } from "@/stores/useAdminStore";
 import { ADMIN_NAV } from "@/lib/types/admin";
@@ -46,7 +46,17 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, status } = useSession();
+
+  // Login page should NOT have admin layout (sidebar, auth checks, etc.)
+  // Without this check, the auth gate below creates an infinite redirect loop
+  // because the login page is inside /admin/ directory
+  const isLoginPage = pathname === "/admin/login";
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
   const {
     user,
     setAuth,
