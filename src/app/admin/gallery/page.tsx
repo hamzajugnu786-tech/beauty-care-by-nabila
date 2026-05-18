@@ -169,7 +169,7 @@ export default function GalleryPage() {
                 onClick={() => setSelectedItem(img)}>
                 {/* Image or Placeholder */}
                 <div className={`${heightMap[img.height]} bg-gradient-to-br from-dark-elevated to-dark-card flex items-center justify-center overflow-hidden`}>
-                  {img.src && !img.src.startsWith("/images") ? (
+                  {img.src ? (
                     <img src={img.src} alt={img.alt} className="w-full h-full object-cover" />
                   ) : (
                     <ImageIcon className="w-8 h-8 text-text-muted/20" />
@@ -214,7 +214,7 @@ export default function GalleryPage() {
                 } ${!img.isActive ? "opacity-40" : ""}`}
                 onClick={() => setSelectedItem(img)}>
                 <div className="w-full h-full bg-gradient-to-br from-dark-elevated to-dark-card flex items-center justify-center overflow-hidden">
-                  {img.src && !img.src.startsWith("/images") ? (
+                  {img.src ? (
                     <img src={img.src} alt={img.alt} className="w-full h-full object-cover" />
                   ) : (
                     <ImageIcon className="w-8 h-8 text-text-muted/20" />
@@ -258,7 +258,7 @@ export default function GalleryPage() {
 
                 {/* Preview */}
                 <div className="aspect-video rounded-xl bg-dark-card border border-border-gold/10 flex items-center justify-center mb-6 overflow-hidden">
-                  {selectedItem.src && !selectedItem.src.startsWith("/images") ? (
+                  {selectedItem.src ? (
                     <img src={selectedItem.src} alt={selectedItem.alt} className="w-full h-full object-cover" />
                   ) : (
                     <ImageIcon className="w-16 h-16 text-text-muted/20" />

@@ -177,7 +177,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto scrollbar-thin">
               {filteredNav.map((item) => {
                 const Icon = iconMap[item.icon] || LayoutDashboard;
-                const isActive = typeof window !== "undefined" && window.location.pathname === item.href;
+                const isActive = pathname === item.href;
                 return (
                   <motion.button
                     key={item.id}

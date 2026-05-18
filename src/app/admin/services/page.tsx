@@ -22,6 +22,8 @@ import {
   Palette,
   Gem,
   Leaf,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react";
 import { DETAILED_SERVICES, SERVICE_CATEGORIES } from "@/lib/constants";
 
@@ -38,6 +40,7 @@ interface ServiceItem {
   duration: string;
   icon: string;
   description: string;
+  image: string;
   isActive: boolean;
   features: string[];
   addOns: string[];
@@ -53,6 +56,7 @@ const initialServices: ServiceItem[] = DETAILED_SERVICES.map((s, i) => ({
   duration: s.duration,
   icon: s.icon,
   description: s.description,
+  image: (s as any).image || "",
   isActive: true,
   features: [...s.features],
   addOns: [...s.addOns],
@@ -62,7 +66,7 @@ const initialServices: ServiceItem[] = DETAILED_SERVICES.map((s, i) => ({
 
 const emptyService: ServiceItem = {
   id: "", title: "", category: "hair", price: "", duration: "", icon: "sparkles",
-  description: "", isActive: true, features: [], addOns: [], popular: false, sortOrder: 0,
+  description: "", image: "", isActive: true, features: [], addOns: [], popular: false, sortOrder: 0,
 };
 
 export default function ServicesPage() {
@@ -74,6 +78,34 @@ export default function ServicesPage() {
   const [formData, setFormData] = useState<ServiceItem>(emptyService);
   const [newFeature, setNewFeature] = useState("");
   const [newAddOn, setNewAddOn] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const handleImageUpload = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      setIsUploadingImage(true);
+      try {
+        const uploadForm = new FormData();
+        uploadForm.append("file", file);
+        uploadForm.append("folder", "nabila-services");
+        uploadForm.append("title", formData.title || file.name);
+        uploadForm.append("category", formData.category);
+        const res = await fetch("/api/cloudinary", { method: "POST", body: uploadForm });
+        if (res.ok) {
+          const data = await res.json();
+          setFormData({ ...formData, image: data.url });
+        }
+      } catch (err) {
+        console.error("Image upload failed:", err);
+      }
+      setIsUploadingImage(false);
+    };
+    input.click();
+  };
 
   const filtered = services.filter((s) => {
     const matchSearch = s.title.toLowerCase().includes(search.toLowerCase()) || s.description.toLowerCase().includes(search.toLowerCase());
@@ -200,9 +232,15 @@ export default function ServicesPage() {
               {/* Card Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-champagne-gold/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-5 h-5 text-champagne-gold" />
-                  </div>
+                  {service.image ? (
+                    <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+                      <img src={service.image} alt={service.title} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-champagne-gold/10 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-champagne-gold" />
+                    </div>
+                  )}
                   <div>
                     <h3 className="text-sm font-medium text-text-primary">{service.title}</h3>
                     <p className="text-[10px] text-text-muted capitalize">{service.category}</p>
@@ -334,6 +372,48 @@ export default function ServicesPage() {
                   <label className="text-xs text-text-muted uppercase tracking-wider mb-1.5 block">Description</label>
                   <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full px-4 py-2.5 bg-dark-card border border-border-gold/10 rounded-xl text-sm text-text-primary focus:outline-none focus:border-champagne-gold/30 resize-none" rows={3} placeholder="Service description..." />
+                </div>
+
+                {/* Service Image */}
+                <div>
+                  <label className="text-xs text-text-muted uppercase tracking-wider mb-1.5 block">Service Image</label>
+                  <div className="flex items-start gap-4">
+                    {formData.image ? (
+                      <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-border-gold/10 flex-shrink-0 group">
+                        <img src={formData.image} alt="Service preview" className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => setFormData({ ...formData, image: "" })}
+                          className="absolute top-1 right-1 p-0.5 bg-matte-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3 text-text-primary" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-24 h-24 rounded-xl border-2 border-dashed border-border-gold/20 flex items-center justify-center flex-shrink-0 bg-dark-card">
+                        <ImageIcon className="w-8 h-8 text-text-muted/30" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <button
+                        onClick={handleImageUpload}
+                        disabled={isUploadingImage}
+                        className="px-4 py-2 bg-dark-card border border-border-gold/10 rounded-xl text-sm text-text-muted hover:text-champagne-gold hover:border-champagne-gold/30 transition-all flex items-center gap-2 disabled:opacity-50"
+                      >
+                        <Upload className="w-4 h-4" />
+                        {isUploadingImage ? "Uploading..." : "Upload Image"}
+                      </button>
+                      <p className="text-[10px] text-text-muted mt-2">PNG, JPG, WebP. Recommended: 800x600px</p>
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          value={formData.image}
+                          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                          className="w-full px-3 py-1.5 bg-dark-card border border-border-gold/10 rounded-lg text-xs text-text-primary focus:outline-none"
+                          placeholder="Or paste image URL..."
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Features */}
