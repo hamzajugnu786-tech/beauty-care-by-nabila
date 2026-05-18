@@ -1,7 +1,10 @@
 // ─── Public Gallery API ───
-// Fetches gallery images from Cloudinary
+// Fetches gallery images: merges Cloudinary resources with database metadata
 
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dm2niml6l";
 const API_KEY = process.env.CLOUDINARY_API_KEY || "255354961216669";
@@ -9,7 +12,26 @@ const API_SECRET = process.env.CLOUDINARY_API_SECRET || "";
 
 export async function GET() {
   try {
-    // Fetch images from the nabila-gallery folder in Cloudinary
+    // First, try to get gallery items from the database
+    const dbItems = await prisma.gallery.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // If we have database items, use them
+    if (dbItems.length > 0) {
+      const images = dbItems.map((item) => ({
+        id: item.id,
+        src: item.src,
+        alt: item.alt,
+        category: item.category,
+        height: item.height,
+        featured: item.featured,
+      }));
+      return NextResponse.json({ images });
+    }
+
+    // Fallback: fetch from Cloudinary if no database items
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/resources/image?max_results=100&prefix=nabila-gallery/`,
       {
@@ -31,11 +53,9 @@ export async function GET() {
       const context = (img.context as Record<string, Record<string, string>>) || {};
       const customMeta = context.custom || {};
 
-      // Extract category from folder or metadata
       const folderParts = publicId.split("/");
       const alt = customMeta.alt || customMeta.caption || folderParts[folderParts.length - 1] || "Gallery image";
 
-      // Clean up filename-based captions (BUG 4 FIX)
       const cleanAlt = /^(IMG|DSC|Screenshot|image|photo|file|VID)_?\d/i.test(alt) || /\.(jpg|jpeg|png|gif|webp|heic)$/i.test(alt)
         ? ""
         : alt;

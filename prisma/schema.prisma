@@ -115,6 +115,19 @@ model Artist {
   updatedAt   DateTime @updatedAt
 }
 
+model Gallery {
+  id          String @id @default(cuid())
+  src         String
+  alt         String
+  category    String @default("general")
+  height      String @default("medium")  // tall, medium, short
+  featured    Boolean @default(false)
+  isActive    Boolean @default(true)
+  cloudinaryId String @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Post {
   id        String   @id @default(cuid())
   title     String
