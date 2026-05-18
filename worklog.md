@@ -125,3 +125,34 @@ Stage Summary:
 - Git bundle created as fallback delivery method
 - Both main and develop branches ready
 - User needs to provide GITHUB_TOKEN or run push-to-github.sh manually
+
+---
+Task ID: gallery-fix
+Agent: main
+Task: Fix gallery image upload and edit/update details feature in admin dashboard
+
+Work Log:
+- Added Gallery model to Prisma schema (id, src, alt, category, height, featured, isActive, cloudinaryId, timestamps)
+- Ran prisma generate to update Prisma client with Gallery model
+- Rewrote /api/admin/gallery/route.ts to use Prisma instead of in-memory store (full CRUD with PostgreSQL)
+- Updated /api/gallery/route.ts (public API) to merge database items with Cloudinary fallback
+- Completely rewrote /admin/gallery/page.tsx with:
+  - API integration: fetches from /api/admin/gallery on mount with Cloudinary fallback
+  - Full Create/Edit modal (like services page) with image upload, alt text, category, height, toggles
+  - Edit button (pencil icon) on each gallery card in both masonry and grid views
+  - "Edit Details" button in detail drawer
+  - Upload images via button or drag zone - saves to Cloudinary AND database
+  - Refresh button to reload gallery data
+  - Success/error notifications
+  - Optimistic UI updates for featured/active/delete toggles
+  - Proper persistence via PATCH/POST/DELETE API calls
+- Updated vercel.json build command to include `prisma db push` for automatic Gallery table creation on deploy
+- TypeScript check: 0 errors
+- Next.js build: successful
+- Pushed to GitHub: 2 commits (2e294f7, e757fc1)
+
+Stage Summary:
+- Gallery admin page now has full CRUD with database persistence
+- Image upload works via Cloudinary with database sync
+- Edit/update details modal added (same style as services edit)
+- All changes verified with tsc and next build before push
