@@ -3,7 +3,7 @@
 
   "framework": "nextjs",
 
-  "buildCommand": "npx prisma generate && npx prisma db push && next build",
+  "buildCommand": "npx prisma generate && next build",
 
   "regions": ["sin1"],
 

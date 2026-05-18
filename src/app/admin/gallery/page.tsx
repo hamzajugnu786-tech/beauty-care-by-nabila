@@ -63,6 +63,13 @@ export default function GalleryPage() {
   const fetchGallery = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Auto-migrate: ensure Gallery table exists before querying
+      try {
+        await fetch("/api/admin/setup");
+      } catch (e) {
+        // Silently continue if setup check fails
+      }
+
       const res = await fetch("/api/admin/gallery");
       if (res.ok) {
         const data = await res.json();
